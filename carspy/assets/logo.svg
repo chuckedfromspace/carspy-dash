@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:export-ydpi="96"
+   inkscape:export-xdpi="96"
+   inkscape:export-filename="D:\153x_CARSpy-Dash\assets\logo.png"
+   sodipodi:docname="_logo.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 8.4666665 8.4666669"
+   height="32"
+   width="32">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     inkscape:window-maximized="1"
+     inkscape:window-y="-8"
+     inkscape:window-x="-8"
+     inkscape:window-height="1017"
+     inkscape:window-width="1920"
+     units="px"
+     showgrid="false"
+     inkscape:document-rotation="0"
+     inkscape:current-layer="layer1"
+     inkscape:document-units="mm"
+     inkscape:cy="11.421102"
+     inkscape:cx="11.11431"
+     inkscape:zoom="6.9324351"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:groupmode="layer"
+     inkscape:label="Ebene 1">
+    <circle
+       style="fill:#000000;stroke-width:0.26513"
+       id="path905"
+       cx="-2.1003296"
+       cy="1.5536418"
+       rx="1.75"
+       ry="1.7427807" />
+    <path
+       id="path836-9-8-2"
+       style="fill:#ffffff;stroke-width:0.592838"
+       d="M 16 0 A 15.999999 15.999999 0 0 0 0 16 A 15.999999 15.999999 0 0 0 16 32 A 15.999999 15.999999 0 0 0 32 16 A 15.999999 15.999999 0 0 0 16 0 z M 16 2 A 14 14 0 0 1 30 16 A 14 14 0 0 1 16 30 A 14 14 0 0 1 2 16 A 14 14 0 0 1 16 2 z "
+       transform="scale(0.26458333)" />
+    <path
+       transform="scale(0.26458333)"
+       d="M 16.191406 2.9824219 C 12.472793 2.9824219 9.3405515 4.2422677 6.796875 6.7617188 C 4.265311 9.2811699 3 12.387644 3 16.082031 C 3 19.730675 4.2295138 22.792099 6.6835938 25.267578 L 6.6835938 16.378906 C 6.6835938 13.651368 7.3968926 11.429977 8.8261719 9.7148438 C 9.648006 8.7262599 10.690597 7.9410434 11.953125 7.3574219 C 13.227564 6.7738001 14.531241 6.4824219 15.865234 6.4824219 C 18.521309 6.4824219 20.761655 7.3755123 22.583984 9.1621094 C 24.004141 10.55442 24.862365 12.195882 25.175781 14.080078 L 28.945312 13.828125 C 28.242774 10.775713 27.043441 8.3953972 25.347656 6.6875 C 22.900882 4.2164999 19.849456 2.9824219 16.191406 2.9824219 z M 15.9375 13.074219 C 14.222367 13.074219 13.365234 14.258688 13.365234 16.628906 L 13.365234 28.789062 C 14.209878 28.941747 15.091029 29.017578 16.009766 29.017578 C 19.643589 29.017578 22.586873 27.928341 24.839844 25.748047 C 27.104927 23.567753 28.491265 20.479627 29 16.482422 L 25.287109 16.384766 C 25.143296 18.63525 24.254463 20.600742 22.601562 22.275391 C 20.791144 24.10963 18.647336 25.027344 16.169922 25.027344 C 15.76496 25.027344 15.168914 24.985718 14.382812 24.902344 L 14.382812 17.541016 C 14.930701 17.98171 15.479454 18.201172 16.027344 18.201172 C 16.718162 18.201172 17.306585 17.945752 17.794922 17.433594 C 18.295169 16.921436 18.546875 16.314056 18.546875 15.611328 C 18.546875 14.9086 18.289501 14.312555 17.777344 13.824219 C 17.265186 13.323972 16.652139 13.074219 15.9375 13.074219 z "
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.84524px;line-height:1.25;font-family:'Bauhaus 93';-inkscape-font-specification:'Bauhaus 93, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.930251"
+       id="path877" />
+  </g>
+</svg>
