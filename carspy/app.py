@@ -1,7 +1,6 @@
 from pathlib import Path
 import dash
 from dash.dependencies import Input, Output, State
-from dash_bootstrap_components._components.Tooltip import Tooltip
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -58,9 +57,11 @@ def toggle_modal(n1, n2, is_open):
 
 
 for _modal, _button, _close in zip(
-        ["struc-modal", "models-modal", "vs1-modal", "vs2-modal", "info-modal"],
+        ["struc-modal", "models-modal", "vs1-modal", "vs2-modal",
+         "info-modal"],
         ["struc-pop", "models-pop", "vs1-pop", "vs2-pop", "info-pop"],
-        ["struc-close", "models-close", "vs1-close", "vs2-close", "info-close"]):
+        ["struc-close", "models-close", "vs1-close", "vs2-close",
+         "info-close"]):
     app.callback(
         Output(_modal, "is_open"),
         [Input(_button, "n_clicks"), Input(_close, "n_clicks")],
