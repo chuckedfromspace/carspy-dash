@@ -1,3 +1,8 @@
 body{
     background: rgb(240, 240, 240);
 }
+
+
+#synth-signal > div {
+    visibility: visible !important;
+}
