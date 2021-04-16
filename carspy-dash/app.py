@@ -179,7 +179,6 @@ feature_menu = dbc.DropdownMenu(
 navbar_title = dbc.Container(
     [
         html.A(
-            # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
                     dbc.Col(html.Img(src=app.get_asset_url("logo.svg"),
