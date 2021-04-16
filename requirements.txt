@@ -1,4 +1,5 @@
 Brotli==1.0.9
+carspy==0.4.2
 click==7.1.2
 dash==1.20.0
 dash-bootstrap-components==0.12.0
@@ -15,6 +16,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
+numpy==1.20.2
 plotly==4.14.3
 pycodestyle==2.7.0
 pyflakes==2.3.1
