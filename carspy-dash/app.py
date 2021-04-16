@@ -16,6 +16,53 @@ app.title = 'CARSpy'
 FLUID_STATE = True
 
 '''
+################################## Plots ######################################
+'''
+INIT_COMP = {'N2': 0.79,
+             'Ar': 0.0,
+             'CO2': 0,
+             'CO': 0,
+             'H2': 0,
+             'O2': 0.21,
+             'H2O': 0,
+             'CH4': 0}
+
+
+def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.2,
+                    nu_start=2250, nu_end=2350,
+                    pump_ls='Gaussian', chi_rs='G-matrix',
+                    convol='Kataoka', doppler_effect=True):
+    synth_mode = {'pump_ls': pump_ls,
+                  'chi_rs': chi_rs,
+                  'convol': convol,
+                  'doppler_effect': doppler_effect,
+                  'chem_eq': False}
+
+    nu = np.linspace(nu_start, nu_end, num=10000)
+    cars = CarsSpectrum(pressure=pressure, init_comp=INIT_COMP,
+                        chi_set="SET 1")
+    _, spect = cars.signal_as(temperature=temperature,
+                              nu_s=nu,
+                              synth_mode=synth_mode,
+                              pump_lw=pump_lw)
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=nu, y=spect/spect.max(),
+        mode='lines',
+        name="CARS Signal",
+    ))
+
+    fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
+    fig.update_layout(height=400,
+                      margin={'l': 20, 'b': 10, 'r': 10, 't': 10},
+                      xaxis_title="Wavenumber [1/cm]",
+                      yaxis_title="Signal [-]")
+
+    return fig
+
+
+'''
 ############################ General functions ################################
 '''
 
@@ -75,7 +122,8 @@ for _modal, _button, _close in zip(
     )(toggle_modal)
 
 
-def synth_mode_select(name, id_addon, id_select, options, tooltiptext):
+def synth_mode_select(name, id_addon, id_select, options, tooltiptext,
+                      default_option=1):
     inputgroup = dbc.InputGroup(
         [
             dbc.InputGroupAddon(name, id=id_addon,
@@ -84,7 +132,7 @@ def synth_mode_select(name, id_addon, id_select, options, tooltiptext):
                 options=[
                     {'label': i, 'value': i} for i in options
                 ],
-                value=options[0],
+                value=options[default_option],
                 id=id_select,
             ),
             dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
@@ -323,11 +371,11 @@ card_setting = dbc.Col(
                     synth_mode_select("species", "species-addon",
                                       "species-select",
                                       ["N2"],
-                                      "Choose a species"),
+                                      "Choose a species", 0),
                     synth_mode_select("pump_ls", "pump_ls-addon",
                                       "pump_ls-select",
                                       ["Gaussian", "Lorentzian"],
-                                      "Choose a pump laser lineshape"),
+                                      "Choose a pump laser lineshape", 0),
                     synth_mode_select("chi_rs", "chi_rs-addon",
                                       "chi_rs-select",
                                       ["G-matrix", "isolated"],
@@ -376,7 +424,10 @@ card_synth = dbc.Col(
             dbc.CardBody(
                 [
                     html.H5("CARS Signal Synthesis"),
-                    dcc.Graph(id="synth-signal"),
+                    dbc.Spinner(
+                        dcc.Graph(id="synth-signal", figure=synthesize_cars()),
+                        color="primary"
+                    ),
                     range_slider
                 ]
             ),
@@ -421,64 +472,18 @@ tab_synth = dbc.Row(
 )
 # APP Layout
 app.layout = html.Div(
-    [
-        navbar,
-        navbar_tabs,
-        dbc.Container(
-            [
-                tab_synth
-            ],
-            fluid=False
-        ),
-        footer
-    ],
-)
-
-'''
-################################## Plots ######################################
-'''
-INIT_COMP = {'N2': 0.79,
-             'Ar': 0.0,
-             'CO2': 0,
-             'CO': 0,
-             'H2': 0,
-             'O2': 0.21,
-             'H2O': 0,
-             'CH4': 0}
-
-
-def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.2,
-                    nu_start=2250, nu_end=2350,
-                    pump_ls='Gaussian', chi_rs='G-matrix',
-                    convol='Kataoka', doppler_effect=True):
-    synth_mode = {'pump_ls': pump_ls,
-                  'chi_rs': chi_rs,
-                  'convol': convol,
-                  'doppler_effect': doppler_effect,
-                  'chem_eq': False}
-
-    nu = np.linspace(nu_start, nu_end, num=10000)
-    cars = CarsSpectrum(pressure=pressure, init_comp=INIT_COMP,
-                        chi_set="SET 1")
-    _, spect = cars.signal_as(temperature=temperature,
-                              nu_s=nu,
-                              synth_mode=synth_mode,
-                              pump_lw=pump_lw)
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=nu, y=spect/spect.max(),
-        mode='lines',
-        name="CARS Signal",
-    ))
-
-    fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
-    fig.update_layout(height=400,
-                      margin={'l': 20, 'b': 10, 'r': 10, 't': 10},
-                      xaxis_title="Wavenumber [1/cm]",
-                      yaxis_title="Signal [-]")
-
-    return fig
+        [
+            navbar,
+            navbar_tabs,
+            dbc.Container(
+                [
+                    tab_synth
+                ],
+                fluid=False
+            ),
+            footer
+        ],
+    )
 
 
 if __name__ == '__main__':
