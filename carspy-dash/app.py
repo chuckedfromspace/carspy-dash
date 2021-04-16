@@ -5,6 +5,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
+import sys
+sys.path.append(".")
 from plots import synthesize_cars
 
 ICONS = 'https://use.fontawesome.com/releases/v5.15.3/css/all.css'
