@@ -5,6 +5,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
+from plots import synthesize_cars
+
 ICONS = 'https://use.fontawesome.com/releases/v5.15.3/css/all.css'
 CUSTOM_CSS = "assets/custom.css"
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO, ICONS])
@@ -12,8 +14,11 @@ server = app.server
 app.title = 'CARSpy'
 FLUID_STATE = True
 
+'''
+############################ General functions ################################
+'''
 
-# General functions
+
 def popup_modal(card_name, src=None, description="",
                 modal_id="modal", close_id="close"):
     modal = dbc.Modal(
@@ -69,7 +74,58 @@ for _modal, _button, _close in zip(
     )(toggle_modal)
 
 
-# Navbar
+def synth_mode_select(name, id_addon, id_select, options, tooltiptext):
+    inputgroup = dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(name, id=id_addon,
+                                addon_type="prepend"),
+            dbc.Select(
+                options=[
+                    {'label': i, 'value': i} for i in options
+                ],
+                value=options[0],
+                id=id_select,
+            ),
+            dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
+        ],
+        className="mb-1"
+    )
+    return inputgroup
+
+
+def synth_inputs(name, unit, id_addon, id_input, value,
+                 tooltiptext):
+    inputgroup = dbc.InputGroup(
+        [
+            dbc.InputGroupAddon(name, id=id_addon, addon_type="prepend"),
+            dbc.Input(id=id_input, value=value, debounce=True),
+            dbc.InputGroupAddon(unit, addon_type="append"),
+            dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
+        ],
+        className="mb-1"
+    )
+    return inputgroup
+
+
+def input_slider(name, input_id, value, value_min, value_max, step):
+    slider = dbc.FormGroup(
+        [
+            dbc.InputGroupAddon(name, addon_type="prepend"),
+            dcc.Slider(id=input_id, min=value_min, max=value_max, value=value,
+                       step=step,
+                       tooltip={"always_visible": True,
+                                "placement": "bottom"},
+                       className="mt-1"
+                       ),
+        ],
+        className="mb-1"
+    )
+    return slider
+
+
+'''
+################################# Navbar ######################################
+'''
 # load the markdown file
 with open(Path(__file__).parent / "intro.md", "r") as f:
     intro_md = f.read()
@@ -254,21 +310,64 @@ footer = html.Footer(
     className="p-3 text-center"
 )
 
-# CARS Synth
+'''
+################################ SYNTH TAB ####################################
+'''
+# setting panels
 card_setting = dbc.Col(
     dbc.Card(
         [
             dbc.CardBody(
                 [
                     html.H5("Settings"),
-                    html.P("Place holder"),
+                    synth_mode_select("species", "species-addon",
+                                      "species-select",
+                                      ["N2"],
+                                      "Choose a species"),
+                    synth_mode_select("pump_ls", "pump_ls-addon",
+                                      "pump_ls-select",
+                                      ["Gaussian", "Lorentzian"],
+                                      "Choose a pump laser lineshape"),
+                    synth_mode_select("chi_rs", "chi_rs-addon",
+                                      "chi_rs-select",
+                                      ["G-matrix", "isolated"],
+                                      "Choose a CARS model"),
+                    synth_mode_select("convol", "convol-addon",
+                                      "convol-select",
+                                      ["Kataoka", "Yuratich"],
+                                      "Choose a convolution method"),
+                    synth_mode_select("doppler_effect", "doppler-addon",
+                                      "doppler-select",
+                                      ["enable", "disable"],
+                                      "Choose to consider Doppler broadening"),
+                    input_slider("Gas pressure [Bar]", "P-input",
+                                 1.0, 1.0, 30, 1),
+                    input_slider("Gas temperature [K]", "T-input",
+                                 1750.0, 300, 3000, 1),
+                    input_slider("Pump laser linewdith [1/cm]",
+                                 "pump_lw-input", 1, 0.01, 5, 0.02)
+                    # range_slider
                 ]
             ),
         ],
-        style={"height": "450px"},
+        style={"height": "510px"},
         className="border-0"
     ),
-    width=5
+    width=5,
+    className="pr-0"
+)
+
+# signal panel
+range_slider = dbc.FormGroup(
+    [
+        dbc.InputGroupAddon("Spectral Range [1/cm]"),
+        dcc.RangeSlider(id="range", min=2200, max=2400, step=2,
+                        value=[2250, 2350],
+                        allowCross=False,
+                        className="mt-1",
+                        tooltip={"always_visible": False,
+                                 "placement": "bottom"}),
+    ]
 )
 
 card_synth = dbc.Col(
@@ -277,15 +376,41 @@ card_synth = dbc.Col(
             dbc.CardBody(
                 [
                     html.H5("CARS Signal Synthesis"),
-                    html.P("Place holder"),
+                    dcc.Graph(id="synth-signal"),
+                    range_slider
                 ]
             ),
         ],
-        style={"height": "450px"},
+        style={"height": "510px"},
         className="border-0"
     ),
     width=7
 )
+
+
+@app.callback(
+    Output('synth-signal', 'figure'),
+    [
+        Input('P-input', 'value'),
+        Input('T-input', 'value'),
+        Input('pump_lw-input', 'value'),
+        Input('range', 'value'),
+        Input('pump_ls-select', 'value'),
+        Input('chi_rs-select', 'value'),
+        Input('convol-select', 'value'),
+        Input('doppler-select', 'value')
+    ]
+)
+def update_synth_signal(P, T, lw, ranges, ls, chi, convol, doppler):
+    if doppler == "enable":
+        dp = True
+    else:
+        dp = False
+    return synthesize_cars(pressure=float(P), temperature=float(T),
+                           pump_lw=float(lw), nu_start=ranges[0],
+                           nu_end=ranges[1], pump_ls=ls, chi_rs=chi,
+                           convol=convol, doppler_effect=dp)
+
 
 tab_synth = dbc.Row(
     [
