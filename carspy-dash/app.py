@@ -319,7 +319,7 @@ navbar_tabs = dbc.Container(
                     },
             ),
             dbc.Tab(
-                label="Least-square Fit",
+                label="Least-Square Fit",
                 activeLabelClassName="border-primary font-weight-bold",
                 active_label_style={
                     "background-color": "rgb(240,240,240)",
@@ -331,7 +331,6 @@ navbar_tabs = dbc.Container(
         className="pt-2"
     ),
     fluid=False,
-    # style={"background-color": "rgb(210, 210, 210)"},
     className="mb-3"
 )
 navbar = dbc.Container(
@@ -387,7 +386,7 @@ card_setting = dbc.Col(
                     synth_mode_select("doppler_effect", "doppler-addon",
                                       "doppler-select",
                                       ["enable", "disable"],
-                                      "Choose to consider Doppler broadening"),
+                                      "Enable to consider Doppler broadening"),
                     input_slider("Gas pressure [Bar]", "P-input",
                                  1.0, 1.0, 30, 1),
                     input_slider("Gas temperature [K]", "T-input",
