@@ -2,7 +2,33 @@ body{
     background: rgb(240, 240, 240);
 }
 
-
 #synth-signal > div {
     visibility: visible !important;
+}
+
+._dash-loading{
+    color: #2780e3;
+    font-size: 30px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+.rc-slider-track{
+    background-color: #2780e3;
+}
+.rc-slider-handle{
+    border-color: #2780e3;
+}
+.rc-slider-handle:hover {
+  border-color: #2780e3;
+}
+.rc-slider-handle:active {
+  border-color: #2780e3;
+  box-shadow: 0 0 5px #2780e3;
+}
+.rc-slider-handle-click-focused:focus {
+  border-color: #2780e3;
 }
