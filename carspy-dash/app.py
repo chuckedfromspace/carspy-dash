@@ -400,8 +400,9 @@ card_setting = dbc.Col(
         style={"height": "510px"},
         className="border-0"
     ),
-    width=5,
-    className="pr-0"
+    width=12,
+    md=5,
+    className="tab-col mb-2"
 )
 
 # signal panel
@@ -434,7 +435,9 @@ card_synth = dbc.Col(
         style={"height": "510px"},
         className="border-0"
     ),
-    width=7
+    width=12,
+    md=7,
+    className="tab-col mb-2"
 )
 
 
