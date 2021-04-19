@@ -31,5 +31,5 @@ body{
 }
 .rc-slider-handle:focus {
   border-color: #2780e3;
-  box-shadow: 0 0 10px #2780e3;
+  box-shadow: 0 0 8px #2780e3;
 }
