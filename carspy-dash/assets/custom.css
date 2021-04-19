@@ -3,7 +3,11 @@ body{
 }
 
 #synth-signal > div {
-    visibility: visible !important;
+    visibility: visible;
+}
+
+#synth-signal[data-dash-is-loading="true"] > div {
+    opacity: 0.5;
 }
 
 ._dash-loading{
