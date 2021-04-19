@@ -29,10 +29,7 @@ body{
 .rc-slider-handle:hover {
   border-color: #2780e3;
 }
-.rc-slider-handle:active {
+.rc-slider-handle:focus {
   border-color: #2780e3;
-  box-shadow: 0 0 5px #2780e3;
-}
-.rc-slider-handle-click-focused:focus {
-  border-color: #2780e3;
+  box-shadow: 0 0 10px #2780e3;
 }
