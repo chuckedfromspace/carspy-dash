@@ -29,6 +29,9 @@ app.layout = html.Div(
                 id="memory-settings-models",
                 data=DEFAULT_SETTINGS_MODELS
             ),
+            dcc.Store(
+                id="memory-synth-spectrum"
+            ),
             navbar,
             navbar_tabs,
             dbc.Container(

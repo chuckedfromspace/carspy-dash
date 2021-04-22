@@ -51,6 +51,8 @@ def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.01,
 def plot_cars(nu=None, spect=None):
     if nu is None and spect is None:
         nu, spect = synthesize_cars()
+    nu = np.array(nu)
+    spect = np.array(spect)
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=nu, y=spect/spect.max(),

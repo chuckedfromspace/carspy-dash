@@ -169,18 +169,29 @@ def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
 
 
 @app.callback(
-    Output("synth-signal", "figure"),
+    Output("memory-synth-spectrum", "data"),
     [
         Input("memory-settings-conditions", "data"),
         Input("memory-settings-models", "data")
     ],
 )
-def update_test(data_1, data_2):
+def update_synth_spectrum(data_1, data_2):
     if data_2["doppler_effect"] == "enable":
         data_2["doppler_effect"] = True
     else:
         data_2["doppler_effect"] = False
     nu, spect = synthesize_cars(**data_1, **data_2)
+    return nu, spect
+
+
+@app.callback(
+    Output("synth-signal", "figure"),
+    [
+        Input("memory-synth-spectrum", "data"),
+    ],
+)
+def update_synth_plot(data):
+    nu, spect = data
     return plot_cars(nu, spect)
 
 
