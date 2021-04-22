@@ -10,7 +10,9 @@ from carspy import CarsSpectrum
 
 ICONS = 'https://use.fontawesome.com/releases/v5.15.3/css/all.css'
 CUSTOM_CSS = "assets/custom.css"
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO, ICONS])
+app = dash.Dash(__name__,
+                suppress_callback_exceptions=True,
+                external_stylesheets=[dbc.themes.COSMO, ICONS])
 server = app.server
 app.title = 'CARSpy'
 FLUID_STATE = True
@@ -27,11 +29,23 @@ INIT_COMP = {'N2': 0.79,
              'H2O': 0,
              'CH4': 0}
 
+DEFAULT_SETTINGS = {
+    "pressure": 1,
+    "temperature": 1750,
+    "pump_lw": 1.01,
+    "nu_start": 2250,
+    "nu_end": 2350,
+    "pump_ls": "Gaussian",
+    "chi_rs": "isolated",
+    "convol": "Y",
+    "doppler_effect": False
+}
 
-def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.2,
+
+def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.01,
                     nu_start=2250, nu_end=2350,
-                    pump_ls='Gaussian', chi_rs='G-matrix',
-                    convol='Kataoka', doppler_effect=True):
+                    pump_ls='Gaussian', chi_rs='isolated',
+                    convol='Y', doppler_effect=False):
     synth_mode = {'pump_ls': pump_ls,
                   'chi_rs': chi_rs,
                   'convol': convol,
@@ -46,6 +60,12 @@ def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.2,
                               synth_mode=synth_mode,
                               pump_lw=pump_lw)
 
+    return nu, spect
+
+
+def plot_cars(nu=None, spect=None):
+    if nu is None and spect is None:
+        nu, spect = synthesize_cars()
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=nu, y=spect/spect.max(),
@@ -360,52 +380,7 @@ footer = html.Footer(
 '''
 ################################ SYNTH TAB ####################################
 '''
-# setting panels
-card_setting = dbc.Col(
-    dbc.Card(
-        [
-            dbc.CardBody(
-                [
-                    html.H5("Settings"),
-                    synth_mode_select("species", "species-addon",
-                                      "species-select",
-                                      ["N2"],
-                                      "Choose a species", 0),
-                    synth_mode_select("pump_ls", "pump_ls-addon",
-                                      "pump_ls-select",
-                                      ["Gaussian", "Lorentzian"],
-                                      "Choose a pump laser lineshape", 0),
-                    synth_mode_select("chi_rs", "chi_rs-addon",
-                                      "chi_rs-select",
-                                      ["G-matrix", "isolated"],
-                                      "Choose a CARS model"),
-                    synth_mode_select("convol", "convol-addon",
-                                      "convol-select",
-                                      ["Kataoka", "Yuratich"],
-                                      "Choose a convolution method"),
-                    synth_mode_select("doppler_effect", "doppler-addon",
-                                      "doppler-select",
-                                      ["enable", "disable"],
-                                      "Enable to consider Doppler broadening"),
-                    input_slider("Gas pressure [Bar]", "P-input",
-                                 1.0, 1.0, 30, 1),
-                    input_slider("Gas temperature [K]", "T-input",
-                                 1750.0, 300, 3000, 1),
-                    input_slider("Pump laser linewdith [1/cm]",
-                                 "pump_lw-input", 1, 0.01, 5, 0.02)
-                    # range_slider
-                ]
-            ),
-        ],
-        style={"height": "510px"},
-        className="border-0"
-    ),
-    width=12,
-    md=5,
-    className="tab-col mb-2"
-)
-
-# signal panel
+# models-tab
 range_slider = dbc.FormGroup(
     [
         dbc.InputGroupAddon("Spectral Range [1/cm]"),
@@ -418,17 +393,96 @@ range_slider = dbc.FormGroup(
     ]
 )
 
+tab_models = [
+    synth_mode_select("species", "species-addon",
+                      "species-select",
+                      ["N2"],
+                      "Choose a species", 0),
+    synth_mode_select("pump_ls", "pump_ls-addon",
+                      "pump_ls-select",
+                      ["Gaussian", "Lorentzian"],
+                      "Choose a pump laser lineshape", 0),
+    synth_mode_select("chi_rs", "chi_rs-addon",
+                      "chi_rs-select",
+                      ["G-matrix", "isolated"],
+                      "Choose a CARS model"),
+    synth_mode_select("convol", "convol-addon",
+                      "convol-select",
+                      ["Kataoka", "Yuratich"],
+                      "Choose a convolution method"),
+    synth_mode_select("doppler_effect", "doppler-addon",
+                      "doppler-select",
+                      ["enable", "disable"],
+                      "Enable to consider Doppler broadening"),
+    input_slider("Pump laser linewdith [1/cm]",
+                 "pump_lw-input", 1.01, 0.01, 5, 0.02),
+    range_slider
+]
+
+# conditions-tab
+def make_tab_conditions(P, T):
+    tab_conditions = [
+        input_slider("Gas pressure [Bar]", "P-input",
+                    P, 1.0, 30, 1),
+        input_slider("Gas temperature [K]", "T-input",
+                    T, 300, 3000, 1),
+    ]
+
+    return tab_conditions
+
+# setting panels
+card_setting = dbc.Col(
+    dbc.Card(
+        [
+            dbc.CardHeader(
+                dbc.Tabs(
+                    [
+                        dbc.Tab(label="Conditions", tab_id="synth-settings-1"),
+                        dbc.Tab(label="Models", tab_id="synth-settings-2"),
+                    ],
+                    id="synth-settings",
+                    card=True,
+                    active_tab="synth-settings-1",
+                ),
+                style={"background-color": "#e9ecef"}
+            ),
+            dbc.CardBody(
+                id="synth-settings-card"
+            ),
+        ],
+        style={"height": "510px"},
+        className="border-0"
+    ),
+    width=12,
+    md=5,
+    className="tab-col mb-2"
+)
+
+# signal panel
 card_synth = dbc.Col(
     dbc.Card(
         [
+            dbc.CardHeader(
+                dbc.Tabs(
+                    [
+                        dbc.Tab(label="CARS Signal", disabled=True,
+                                active_label_style={
+                                    "background-color": "#e9ecef",
+                                    "border-width": "1px 0 1px 0px",
+                                    "border-top-color": "#e9ecef",
+                                    "border-bottom-color": "#d8d8d8",
+                                }),
+                    ],
+                    card=True,
+                ),
+                style={"background-color": "#e9ecef"}
+            ),
             dbc.CardBody(
                 [
-                    html.H5("CARS Signal Synthesis"),
                     dbc.Spinner(
-                        dcc.Graph(id="synth-signal", figure=synthesize_cars()),
+                        dcc.Graph(id="synth-signal", figure=plot_cars()),
                         color="primary"
                     ),
-                    range_slider
                 ]
             ),
         ],
@@ -442,27 +496,38 @@ card_synth = dbc.Col(
 
 
 @app.callback(
-    Output('synth-signal', 'figure'),
+    Output("synth-settings-card", "children"),
+    Input("synth-settings", "active_tab"),
+    State("memory-settings", "data"),
+)
+def tab_content(active_tab, data):
+    if active_tab == "synth-settings-1":
+        return make_tab_conditions(data["pressure"],  data["temperature"])
+    else:
+        return tab_models
+
+
+@app.callback(
+    Output("memory-settings", "data"),
     [
         Input('P-input', 'value'),
         Input('T-input', 'value'),
-        Input('pump_lw-input', 'value'),
-        Input('range', 'value'),
-        Input('pump_ls-select', 'value'),
-        Input('chi_rs-select', 'value'),
-        Input('convol-select', 'value'),
-        Input('doppler-select', 'value')
+        State("memory-settings", "data"),
     ]
 )
-def update_synth_signal(P, T, lw, ranges, ls, chi, convol, doppler):
-    if doppler == "enable":
-        dp = True
-    else:
-        dp = False
-    return synthesize_cars(pressure=float(P), temperature=float(T),
-                           pump_lw=float(lw), nu_start=ranges[0],
-                           nu_end=ranges[1], pump_ls=ls, chi_rs=chi,
-                           convol=convol, doppler_effect=dp)
+def update_memory(P, T, data):
+    data['pressure'] = P
+    data['temperature'] = T
+    return data
+
+
+@app.callback(
+    Output("synth-signal", "figure"),
+    Input("memory-settings", "data")
+)
+def update_test(data):
+    nu, spect = synthesize_cars(**data)
+    return plot_cars(nu, spect)
 
 
 tab_synth = dbc.Row(
@@ -475,6 +540,10 @@ tab_synth = dbc.Row(
 # APP Layout
 app.layout = html.Div(
         [
+            dcc.Store(
+                id="memory-settings",
+                data=DEFAULT_SETTINGS
+            ),
             navbar,
             navbar_tabs,
             dbc.Container(
@@ -483,7 +552,7 @@ app.layout = html.Div(
                 ],
                 fluid=False
             ),
-            footer
+            footer,
         ],
     )
 
