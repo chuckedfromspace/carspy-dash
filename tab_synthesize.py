@@ -60,7 +60,7 @@ def input_slider(name, input_id, value, value_min, value_max, step):
 def make_tab_conditions(P, T):
     tab_conditions = [
         input_slider("Gas pressure [Bar]", "P-input",
-                     P, 1.0, 30, 1),
+                     P, 0.5, 20, 0.5),
         input_slider("Gas temperature [K]", "T-input",
                      T, 300, 3000, 1),
     ]
@@ -74,7 +74,7 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
     range_slider = dbc.FormGroup(
         [
             dbc.InputGroupAddon("Spectral Range [1/cm]"),
-            dcc.RangeSlider(id="range", min=2200, max=2400, step=2,
+            dcc.RangeSlider(id="spectral-range", min=2200, max=2360, step=2,
                             value=[nu_start, nu_end],
                             allowCross=False,
                             className="mt-1",
@@ -116,37 +116,71 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
 @app.callback(
     Output("synth-settings-card", "children"),
     Input("synth-settings", "active_tab"),
-    State("memory-settings", "data"),
+    State("memory-settings-conditions", "data"),
+    State("memory-settings-models", "data"),
 )
-def tab_content(active_tab, data):
+def tab_content(active_tab, data_1, data_2):
     if active_tab == "synth-settings-1":
-        return make_tab_conditions(data["pressure"],  data["temperature"])
+        return make_tab_conditions(data_1["pressure"],  data_1["temperature"])
     else:
-        return make_tab_models(data["nu_start"], data["nu_end"],
-                               data["pump_ls"], data["chi_rs"], data["convol"],
-                               data["doppler_effect"], data["pump_lw"])
+        return make_tab_models(data_2["nu_start"], data_2["nu_end"],
+                               data_2["pump_ls"], data_2["chi_rs"],
+                               data_2["convol"], data_2["doppler_effect"],
+                               data_2["pump_lw"])
 
 
 @app.callback(
-    Output("memory-settings", "data"),
+    Output("memory-settings-conditions", "data"),
     [
         Input('P-input', 'value'),
         Input('T-input', 'value'),
-        State("memory-settings", "data"),
+        State("memory-settings-conditions", "data"),
     ]
 )
-def update_memory(P, T, data):
+def update_memory_conditions(P, T, data):
     data['pressure'] = P
     data['temperature'] = T
     return data
 
 
 @app.callback(
-    Output("synth-signal", "figure"),
-    Input("memory-settings", "data")
+    Output("memory-settings-models", "data"),
+    [
+        Input('pump_ls-select', 'value'),
+        Input('chi_rs-select', 'value'),
+        Input('convol-select', 'value'),
+        Input('doppler-select', 'value'),
+        Input('pump_lw-input', 'value'),
+        Input('spectral-range', 'value'),
+        State("memory-settings-models", "data"),
+    ]
 )
-def update_test(data):
-    nu, spect = synthesize_cars(**data)
+def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
+                         spectral_range, data):
+    data["nu_start"] = spectral_range[0]
+    data["nu_end"] = spectral_range[1]
+    data["pump_ls"] = pump_ls
+    data["chi_rs"] = chi_rs
+    data["convol"] = convol
+    data["doppler_effect"] = doppler_effect
+    data["pump_lw"] = pump_lw
+
+    return data
+
+
+@app.callback(
+    Output("synth-signal", "figure"),
+    [
+        Input("memory-settings-conditions", "data"),
+        Input("memory-settings-models", "data")
+    ],
+)
+def update_test(data_1, data_2):
+    if data_2["doppler_effect"] == "enable":
+        data_2["doppler_effect"] = True
+    else:
+        data_2["doppler_effect"] = False
+    nu, spect = synthesize_cars(**data_1, **data_2)
     return plot_cars(nu, spect)
 
 

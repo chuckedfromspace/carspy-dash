@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from app import app
 from navbar import navbar, navbar_tabs
 from tab_synthesize import tab_synth
-from utils import DEFAULT_SETTINGS
+from utils import DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS
 
 footer = html.Footer(
     [
@@ -22,8 +22,12 @@ footer = html.Footer(
 app.layout = html.Div(
         [
             dcc.Store(
-                id="memory-settings",
-                data=DEFAULT_SETTINGS
+                id="memory-settings-conditions",
+                data=DEFAULT_SETTINGS_CONDITIONS
+            ),
+            dcc.Store(
+                id="memory-settings-models",
+                data=DEFAULT_SETTINGS_MODELS
             ),
             navbar,
             navbar_tabs,

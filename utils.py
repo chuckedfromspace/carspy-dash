@@ -11,16 +11,19 @@ INIT_COMP = {'N2': 0.79,
              'H2O': 0,
              'CH4': 0}
 
-DEFAULT_SETTINGS = {
+DEFAULT_SETTINGS_CONDITIONS = {
     "pressure": 1,
     "temperature": 1750,
+}
+
+DEFAULT_SETTINGS_MODELS = {
     "pump_lw": 1.01,
     "nu_start": 2250,
     "nu_end": 2350,
     "pump_ls": "Gaussian",
     "chi_rs": "isolated",
-    "convol": "Y",
-    "doppler_effect": False
+    "convol": "Yuratich",
+    "doppler_effect": "disable"
 }
 
 
