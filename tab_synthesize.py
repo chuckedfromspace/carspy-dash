@@ -285,32 +285,24 @@ def reset_models(n, data):
 
 
 @app.callback(
-    Output("memory-synth-spectrum", "data"),
+    [
+        Output("memory-synth-spectrum", "data"),
+        Output("synth-signal", "figure"),
+    ],
     [
         Input("memory-settings-conditions", "data"),
-        Input("memory-settings-models", "data")
+        Input("memory-settings-models", "data"),
+        Input("change-y-scale", "value")
     ],
 )
-def update_synth_spectrum(data_1, data_2):
+def update_synth_spectrum(data_1, data_2, y_scale):
     if data_2["doppler_effect"] == "enable":
         data_2["doppler_effect"] = True
     else:
         data_2["doppler_effect"] = False
     nu, spect = synthesize_cars(**data_1, **data_2)
-    return nu, spect
-
-
-@app.callback(
-    Output("synth-signal", "figure"),
-    Input("memory-synth-spectrum", "data"),
-    Input("change-y-scale", "value")
-)
-def update_synth_plot(data, y_scale):
-    if data is not None:
-        nu, spect = data
-        return plot_cars(nu, spect, y_scale)
-    else:
-        return plot_cars()
+    figure = plot_cars(nu, spect, y_scale)
+    return [nu, spect], figure
 
 
 # setting panels
@@ -382,12 +374,11 @@ card_synth = dbc.Col(
                             className="fas fa-undo-alt ml-0",
                             style={"font-size": "1.5em"},
                         ),
-                        className="float-right px-0",
+                        className="float-right p-0 shadow-none",
                         color="link",
                         size="sm",
                         id="reset-button",
                         n_clicks=0,
-                        type="reset"
                     )
                 ]
             ),
