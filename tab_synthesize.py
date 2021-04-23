@@ -1,9 +1,11 @@
 import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from app import app
-from utils import plot_cars, synthesize_cars
+from utils import (DEFAULT_SETTINGS_CONDITIONS, plot_cars, synthesize_cars,
+                   DEFAULT_SETTINGS_MODELS)
 
 
 def synth_mode_select(name, id_addon, id_select, options, tooltiptext,
@@ -22,17 +24,17 @@ def synth_mode_select(name, id_addon, id_select, options, tooltiptext,
             dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
         ],
         className="mb-1"
+
     )
     return inputgroup
 
 
-def synth_inputs(name, unit, id_addon, id_input, value,
+def synth_inputs(name, id_addon, id_input, value,
                  tooltiptext):
     inputgroup = dbc.InputGroup(
         [
             dbc.InputGroupAddon(name, id=id_addon, addon_type="prepend"),
             dbc.Input(id=id_input, value=value, debounce=True),
-            dbc.InputGroupAddon(unit, addon_type="append"),
             dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
         ],
         className="mb-1"
@@ -132,17 +134,40 @@ def tab_content(active_tab, data_1, data_2):
 
 
 @app.callback(
+    Output("reset-button", "n_clicks"),
+    Input("synth-settings", "active_tab"),
+)
+def re_zero(active_tab):
+    return 0
+
+
+@app.callback(
     Output("memory-settings-conditions", "data"),
     [
         Input('P-input', 'value'),
         Input('T-input', 'value'),
-        State("memory-settings-conditions", "data"),
-    ]
+    ],
+    State("memory-settings-conditions", "data"),
 )
 def update_memory_conditions(P, T, data):
     data['pressure'] = P
     data['temperature'] = T
     return data
+
+
+@app.callback(
+    [
+        Output('P-input', 'value'),
+        Output('T-input', 'value')
+    ],
+    Input('reset-button', 'n_clicks'),
+    State("memory-settings-conditions", "data"),
+)
+def reset_conditions(n, data):
+    if n > 0:
+        return list(DEFAULT_SETTINGS_CONDITIONS.values())
+    else:
+        return list(data.values())
 
 
 @app.callback(
@@ -170,6 +195,29 @@ def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
     data["num_sample"] = num_sample
 
     return data
+
+
+@app.callback(
+    [
+        Output('pump_ls-select', 'value'),
+        Output('chi_rs-select', 'value'),
+        Output('convol-select', 'value'),
+        Output('doppler-select', 'value'),
+        Output('pump_lw-input', 'value'),
+        Output('spectral-range', 'value'),
+        Output('num_sample-input', 'value'),
+    ],
+    Input('reset-button', 'n_clicks'),
+    State("memory-settings-models", "data"),
+)
+def reset_models(n, data):
+    if n > 0:
+        data = DEFAULT_SETTINGS_MODELS
+    _settings = [data["pump_ls"], data["chi_rs"], data["convol"],
+                 data["doppler_effect"], data["pump_lw"],
+                 [data["nu_start"], data["nu_end"]],
+                 data["num_sample"]]
+    return _settings
 
 
 @app.callback(
@@ -226,7 +274,7 @@ card_setting = dbc.Col(
     ),
     width=12,
     md=5,
-    className="tab-col mb-2"
+    className="tab-col mb-2",
 )
 
 # signal panel
@@ -260,9 +308,23 @@ card_synth = dbc.Col(
                         id="change-y-scale"
                     ),
                     dbc.Spinner(
-                        dcc.Graph(id="synth-signal", figure=plot_cars()),
+                        dcc.Graph(id="synth-signal", figure=plot_cars(),
+                                  className="mt-2"),
                         color="primary"
                     ),
+                    dbc.Button(
+                        html.I(
+                            title="Reset to default",
+                            className="fas fa-undo-alt ml-0",
+                            style={"font-size": "1.5em"},
+                        ),
+                        className="float-right px-0",
+                        color="link",
+                        size="sm",
+                        id="reset-button",
+                        n_clicks=0,
+                        type="reset"
+                    )
                 ]
             ),
         ],
