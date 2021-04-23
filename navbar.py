@@ -7,6 +7,18 @@ import dash_bootstrap_components as dbc
 from app import app
 
 
+# callback for collapsing menu
+@app.callback(
+    Output("navbar-collapse", "is_open"),
+    [Input("navbar-toggler", "n_clicks")],
+    [State("navbar-collapse", "is_open")],
+)
+def toggle_navbar_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+
 def popup_modal(card_name, src=None, description="",
                 modal_id="modal", close_id="close"):
     modal = dbc.Modal(
@@ -131,60 +143,65 @@ navbar_title = dbc.Container(
                 no_gutters=True,
             ),
         ),
-        dbc.Nav(
-            [
-                dbc.NavLink(
-                    [
-                        html.I(
-                            title="Intro",
-                            className="fas fa-info-circle mr-1",
-                            style={"font-size": "1.5em"},
-                            id="info-icon"
-                        ),
-                        popup_modal("Introduction",
-                                    description=dcc.Markdown(intro_md),
-                                    modal_id="info-modal",
-                                    close_id="info-close"),
-                    ],
-                    id="info-pop",
-                    href="#"
-                ),
-                dbc.NavLink(
-                    [
-                        html.I(
-                            title="Github",
-                            className="fab fa-github mr-1",
-                            style={"font-size": "1.5em"}
-                        ),
-                        "",
-                    ],
-                    href="https://github.com/chuckedfromspace/"
-                         + "carspy-dash",
-                ),
-                dbc.NavLink(
-                    [
-                        html.I(
-                            title="Docs",
-                            className="fas fa-book mr-1",
-                            style={"font-size": "1.5em"}
-                        ),
-                        "",
-                    ],
-                    href="https://carspy.readthedocs.io/"
-                ),
-                dbc.NavLink(
-                    [
-                        html.I(
-                            title="PyPI",
-                            className="fas fa-cubes mr-1",
-                            style={"font-size": "1.5em"}
-                        ),
-                        "",
-                    ],
-                    href="https://pypi.org/project/carspy/"
-                ),
-            ],
-            className="ml-auto",
+        dbc.NavbarToggler(id="navbar-toggler"),
+        dbc.Collapse(
+            dbc.Nav(
+                [
+                    dbc.NavLink(
+                        [
+                            html.I(
+                                title="Intro",
+                                className="fas fa-info-circle mr-1",
+                                style={"font-size": "1.5em"},
+                                id="info-icon"
+                            ),
+                            popup_modal("Introduction",
+                                        description=dcc.Markdown(intro_md),
+                                        modal_id="info-modal",
+                                        close_id="info-close"),
+                        ],
+                        id="info-pop",
+                        href="#"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(
+                                title="Github",
+                                className="fab fa-github mr-1",
+                                style={"font-size": "1.5em"}
+                            ),
+                            "",
+                        ],
+                        href="https://github.com/chuckedfromspace/"
+                             + "carspy-dash",
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(
+                                title="Docs",
+                                className="fas fa-book mr-1",
+                                style={"font-size": "1.5em"}
+                            ),
+                            "",
+                        ],
+                        href="https://carspy.readthedocs.io/"
+                    ),
+                    dbc.NavLink(
+                        [
+                            html.I(
+                                title="PyPI",
+                                className="fas fa-cubes mr-1",
+                                style={"font-size": "1.5em"}
+                            ),
+                            "",
+                        ],
+                        href="https://pypi.org/project/carspy/"
+                    ),
+                ],
+                className="ml-auto",
+                navbar=True
+            ),
+            id="navbar-collapse",
             navbar=True
         ),
     ],
