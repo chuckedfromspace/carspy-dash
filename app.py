@@ -6,6 +6,5 @@ CUSTOM_CSS = "assets/custom.css"
 app = dash.Dash(__name__,
                 suppress_callback_exceptions=True,
                 external_stylesheets=[dbc.themes.COSMO, ICONS])
-server = app.server
 app.title = 'CARSpy'
 FLUID_STATE = True

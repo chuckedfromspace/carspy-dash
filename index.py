@@ -2,10 +2,12 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
-from app import app, server
+from app import app
 from navbar import navbar, navbar_tabs
 from tab_synthesize import tab_synth
 from utils import DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS
+
+server = app.server
 
 footer = html.Footer(
     [
