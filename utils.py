@@ -14,6 +14,7 @@ INIT_COMP = {'N2': 0.79,
 DEFAULT_SETTINGS_CONDITIONS = {
     "pressure": 1,
     "temperature": 1750,
+    "comp": INIT_COMP,
 }
 
 DEFAULT_SETTINGS_MODELS = {
@@ -31,15 +32,18 @@ DEFAULT_SETTINGS_MODELS = {
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
                     nu_start=2250, nu_end=2350, num_sample=10000,
                     pump_ls='Gaussian', chi_rs='isolated',
-                    convol='Y', doppler_effect=False):
+                    convol='Y', doppler_effect=False, comp=None):
     synth_mode = {'pump_ls': pump_ls,
                   'chi_rs': chi_rs,
                   'convol': convol,
                   'doppler_effect': doppler_effect,
                   'chem_eq': False}
 
+    if comp is None:
+        comp = INIT_COMP
+
     nu = np.linspace(nu_start, nu_end, num=num_sample)
-    cars = CarsSpectrum(pressure=pressure, init_comp=INIT_COMP,
+    cars = CarsSpectrum(pressure=pressure, init_comp=comp,
                         chi_set="SET 3")
     _, spect = cars.signal_as(temperature=temperature,
                               nu_s=nu,
@@ -67,6 +71,6 @@ def plot_cars(nu=None, spect=None, y_scale="Linear"):
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]")
     if y_scale == "Log":
-        fig.update_yaxes(type="log", range=[-3.1, 0.2], dtick=1)
+        fig.update_yaxes(type="log", range=[-2.5, 0.2], dtick=1)
 
     return fig

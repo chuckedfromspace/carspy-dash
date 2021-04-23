@@ -34,7 +34,7 @@ def synth_inputs(name, id_input, value):
         [
             dbc.InputGroupAddon(name, addon_type="prepend",
                                 className="col-6 px-0"),
-            dbc.Input(id=id_input, value=value, debounce=True,
+            dbc.Input(id=id_input, value=float(value), debounce=True,
                       className="col-6"),
             # dbc.InputGroupAddon("%", addon_type="append"),
         ],
@@ -60,7 +60,8 @@ def input_slider(name, input_id, value, value_min, value_max, step):
 
 
 # conditions-tab
-def make_tab_conditions(P, T):
+def make_tab_conditions(P, T, x_N2, x_Ar, x_H2, x_O2,
+                        x_CO2, x_CO, x_H2O, x_CH4):
     tab_conditions = [
         input_slider("Gas pressure [Bar]", "P-input",
                      P, 0.5, 20, 0.5),
@@ -72,19 +73,19 @@ def make_tab_conditions(P, T):
             [
                 dbc.Col(
                     [
-                        synth_inputs("N2", "x-N2", 0.7),
-                        synth_inputs("Ar", "x-Ar", 0.7),
-                        synth_inputs("H2", "x-H2", 0.7),
-                        synth_inputs("O2", "x-O2", 0.7),
+                        synth_inputs("N2", "x-N2", x_N2),
+                        synth_inputs("Ar", "x-Ar", x_Ar),
+                        synth_inputs("H2", "x-H2", x_H2),
+                        synth_inputs("O2", "x-O2", x_O2),
                     ],
                     className="tab-col pl-3"
                 ),
                 dbc.Col(
                     [
-                        synth_inputs("CO2", "x-CO2", 0.7),
-                        synth_inputs("CO", "x-CO", 0.7),
-                        synth_inputs("H2O", "x-H2O", 0.7),
-                        synth_inputs("CH4", "x-CH4", 0.7),
+                        synth_inputs("CO2", "x-CO2", x_CO2),
+                        synth_inputs("CO", "x-CO", x_CO),
+                        synth_inputs("H2O", "x-H2O", x_H2O),
+                        synth_inputs("CH4", "x-CH4", x_CH4),
                     ],
                     className="tab-col pr-3"
                 ),
@@ -106,7 +107,7 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
     range_slider = dbc.FormGroup(
         [
             dbc.InputGroupAddon("Spectral Range [1/cm]"),
-            dcc.RangeSlider(id="spectral-range", min=2200, max=2360, step=2,
+            dcc.RangeSlider(id="spectral-range", min=2200, max=2400, step=2,
                             value=[nu_start, nu_end],
                             allowCross=False,
                             className="mt-1",
@@ -155,7 +156,12 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
 )
 def tab_content(active_tab, data_1, data_2):
     if active_tab == "synth-settings-1":
-        return make_tab_conditions(data_1["pressure"],  data_1["temperature"])
+        return make_tab_conditions(data_1["pressure"],  data_1["temperature"],
+                                   data_1["comp"]["N2"], data_1["comp"]["Ar"],
+                                   data_1["comp"]["H2"], data_1["comp"]["O2"],
+                                   data_1["comp"]["CO2"], data_1["comp"]["CO"],
+                                   data_1["comp"]["H2O"], data_1["comp"]["CH4"]
+                                   )
     else:
         return make_tab_models(data_2["nu_start"], data_2["nu_end"],
                                data_2["pump_ls"], data_2["chi_rs"],
@@ -176,28 +182,56 @@ def re_zero(active_tab):
     [
         Input('P-input', 'value'),
         Input('T-input', 'value'),
+        Input('x-N2', 'value'),
+        Input('x-Ar', 'value'),
+        Input('x-H2', 'value'),
+        Input('x-O2', 'value'),
+        Input('x-CO2', 'value'),
+        Input('x-CO', 'value'),
+        Input('x-H2O', 'value'),
+        Input('x-CH4', 'value'),
     ],
     State("memory-settings-conditions", "data"),
 )
-def update_memory_conditions(P, T, data):
+def update_memory_conditions(P, T, x_N2, x_Ar, x_H2, x_O2, x_CO2, x_CO, x_H2O,
+                             x_CH4, data):
     data['pressure'] = P
     data['temperature'] = T
+    data['comp']["N2"] = float(x_N2)
+    data['comp']["Ar"] = float(x_Ar)
+    data['comp']["H2"] = float(x_H2)
+    data['comp']["O2"] = float(x_O2)
+    data['comp']["CO2"] = float(x_CO2)
+    data['comp']["CO"] = float(x_CO)
+    data['comp']["H2O"] = float(x_H2O)
+    data['comp']["CH4"] = float(x_CH4)
     return data
 
 
 @app.callback(
     [
         Output('P-input', 'value'),
-        Output('T-input', 'value')
+        Output('T-input', 'value'),
+        Output('x-N2', 'value'),
+        Output('x-Ar', 'value'),
+        Output('x-H2', 'value'),
+        Output('x-O2', 'value'),
+        Output('x-CO2', 'value'),
+        Output('x-CO', 'value'),
+        Output('x-H2O', 'value'),
+        Output('x-CH4', 'value'),
     ],
     Input('reset-button', 'n_clicks'),
     State("memory-settings-conditions", "data"),
 )
 def reset_conditions(n, data):
     if n > 0:
-        return list(DEFAULT_SETTINGS_CONDITIONS.values())
-    else:
-        return list(data.values())
+        data = DEFAULT_SETTINGS_CONDITIONS
+    _settings = [data["pressure"], data["temperature"], data['comp']["N2"],
+                 data['comp']["Ar"], data['comp']["H2"], data['comp']["O2"],
+                 data['comp']["CO2"], data['comp']["CO"], data['comp']["H2O"],
+                 data['comp']["CH4"]]
+    return _settings
 
 
 @app.callback(
