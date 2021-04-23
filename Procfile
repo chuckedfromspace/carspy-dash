@@ -1,1 +1,1 @@
-web: gunicorn carspy-dash.app:server
+web: gunicorn app:server
