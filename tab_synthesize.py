@@ -29,13 +29,14 @@ def synth_mode_select(name, id_addon, id_select, options, tooltiptext,
     return inputgroup
 
 
-def synth_inputs(name, id_addon, id_input, value,
-                 tooltiptext):
+def synth_inputs(name, id_input, value):
     inputgroup = dbc.InputGroup(
         [
-            dbc.InputGroupAddon(name, id=id_addon, addon_type="prepend"),
-            dbc.Input(id=id_input, value=value, debounce=True),
-            dbc.Tooltip(tooltiptext, target=id_addon, placement="bottom")
+            dbc.InputGroupAddon(name, addon_type="prepend",
+                                className="col-6 px-0"),
+            dbc.Input(id=id_input, value=value, debounce=True,
+                      className="col-6"),
+            # dbc.InputGroupAddon("%", addon_type="append"),
         ],
         className="mb-1"
     )
@@ -65,6 +66,35 @@ def make_tab_conditions(P, T):
                      P, 0.5, 20, 0.5),
         input_slider("Gas temperature [K]", "T-input",
                      T, 300, 3000, 1),
+        dbc.InputGroupAddon("Gas composition", addon_type="prepend",
+                            className="mt-3"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        synth_inputs("N2", "x-N2", 0.7),
+                        synth_inputs("Ar", "x-Ar", 0.7),
+                        synth_inputs("H2", "x-H2", 0.7),
+                        synth_inputs("O2", "x-O2", 0.7),
+                    ],
+                    className="tab-col pl-3"
+                ),
+                dbc.Col(
+                    [
+                        synth_inputs("CO2", "x-CO2", 0.7),
+                        synth_inputs("CO", "x-CO", 0.7),
+                        synth_inputs("H2O", "x-H2O", 0.7),
+                        synth_inputs("CH4", "x-CH4", 0.7),
+                    ],
+                    className="tab-col pr-3"
+                ),
+            ],
+            className="mt-2 mb-2"
+        ),
+        synth_mode_select("Nonresonant BG", "chi_nr-addon", "chi_nr-select",
+                          ["SET 3"],
+                          "Choose the set of non-resonant background",
+                          "SET 3")
     ]
 
     return tab_conditions

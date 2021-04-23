@@ -7,6 +7,10 @@ body{
     padding-right: 5px;
 }
 
+.col-6 > .input-group-text{
+    width: 100%;
+}
+
 #synth-signal > div {
     visibility: visible;
 }
