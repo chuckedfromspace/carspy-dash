@@ -51,7 +51,7 @@ def input_slider(name, input_id, value, value_min, value_max, step):
                        className="mt-1"
                        ),
         ],
-        className="mb-1"
+        className="mb-2"
     )
     return slider
 
@@ -70,7 +70,7 @@ def make_tab_conditions(P, T):
 
 # models-tab
 def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
-                    pump_lw):
+                    pump_lw, num_sample):
     range_slider = dbc.FormGroup(
         [
             dbc.InputGroupAddon("Spectral Range [1/cm]"),
@@ -78,7 +78,7 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
                             value=[nu_start, nu_end],
                             allowCross=False,
                             className="mt-1",
-                            tooltip={"always_visible": False,
+                            tooltip={"always_visible": True,
                                      "placement": "bottom"}),
         ]
     )
@@ -106,7 +106,9 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
                           "Enable to consider Doppler broadening",
                           doppler_effect),
         input_slider("Pump laser linewdith [1/cm]",
-                     "pump_lw-input", pump_lw, 0.01, 5, 0.02),
+                     "pump_lw-input", pump_lw, 0.02, 5, 0.02),
+        input_slider("Number of sampling points",
+                     "num_sample-input", num_sample, 8000, 30000, 2000),
         range_slider
     ]
 
@@ -126,7 +128,7 @@ def tab_content(active_tab, data_1, data_2):
         return make_tab_models(data_2["nu_start"], data_2["nu_end"],
                                data_2["pump_ls"], data_2["chi_rs"],
                                data_2["convol"], data_2["doppler_effect"],
-                               data_2["pump_lw"])
+                               data_2["pump_lw"], data_2["num_sample"])
 
 
 @app.callback(
@@ -152,11 +154,12 @@ def update_memory_conditions(P, T, data):
         Input('doppler-select', 'value'),
         Input('pump_lw-input', 'value'),
         Input('spectral-range', 'value'),
+        Input('num_sample-input', 'value'),
         State("memory-settings-models", "data"),
     ]
 )
 def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
-                         spectral_range, data):
+                         spectral_range, num_sample, data):
     data["nu_start"] = spectral_range[0]
     data["nu_end"] = spectral_range[1]
     data["pump_ls"] = pump_ls
@@ -164,6 +167,7 @@ def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
     data["convol"] = convol
     data["doppler_effect"] = doppler_effect
     data["pump_lw"] = pump_lw
+    data["num_sample"] = num_sample
 
     return data
 
@@ -186,13 +190,15 @@ def update_synth_spectrum(data_1, data_2):
 
 @app.callback(
     Output("synth-signal", "figure"),
-    [
-        Input("memory-synth-spectrum", "data"),
-    ],
+    Input("memory-synth-spectrum", "data"),
+    Input("change-y-scale", "value")
 )
-def update_synth_plot(data):
-    nu, spect = data
-    return plot_cars(nu, spect)
+def update_synth_plot(data, y_scale):
+    if data is not None:
+        nu, spect = data
+        return plot_cars(nu, spect, y_scale)
+    else:
+        return plot_cars()
 
 
 # setting panels
@@ -215,7 +221,7 @@ card_setting = dbc.Col(
                 id="synth-settings-card"
             ),
         ],
-        style={"height": "510px"},
+        style={"height": "540px"},
         className="border-0"
     ),
     width=12,
@@ -244,6 +250,15 @@ card_synth = dbc.Col(
             ),
             dbc.CardBody(
                 [
+                    dbc.RadioItems(
+                        options=[
+                            {"label": "Linear", "value": "Linear"},
+                            {"label": "Log", "value": "Log"},
+                        ],
+                        value="Linear",
+                        inline=True,
+                        id="change-y-scale"
+                    ),
                     dbc.Spinner(
                         dcc.Graph(id="synth-signal", figure=plot_cars()),
                         color="primary"
@@ -251,7 +266,7 @@ card_synth = dbc.Col(
                 ]
             ),
         ],
-        style={"height": "510px"},
+        style={"height": "540px"},
         className="border-0"
     ),
     width=12,
