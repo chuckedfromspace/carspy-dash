@@ -17,9 +17,10 @@ DEFAULT_SETTINGS_CONDITIONS = {
 }
 
 DEFAULT_SETTINGS_MODELS = {
-    "pump_lw": 1.01,
+    "pump_lw": 1.0,
     "nu_start": 2250,
     "nu_end": 2350,
+    "num_sample": 10000,
     "pump_ls": "Gaussian",
     "chi_rs": "isolated",
     "convol": "Yuratich",
@@ -27,8 +28,8 @@ DEFAULT_SETTINGS_MODELS = {
 }
 
 
-def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.01,
-                    nu_start=2250, nu_end=2350,
+def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
+                    nu_start=2250, nu_end=2350, num_sample=10000,
                     pump_ls='Gaussian', chi_rs='isolated',
                     convol='Y', doppler_effect=False):
     synth_mode = {'pump_ls': pump_ls,
@@ -37,9 +38,9 @@ def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.01,
                   'doppler_effect': doppler_effect,
                   'chem_eq': False}
 
-    nu = np.linspace(nu_start, nu_end, num=10000)
+    nu = np.linspace(nu_start, nu_end, num=num_sample)
     cars = CarsSpectrum(pressure=pressure, init_comp=INIT_COMP,
-                        chi_set="SET 1")
+                        chi_set="SET 3")
     _, spect = cars.signal_as(temperature=temperature,
                               nu_s=nu,
                               synth_mode=synth_mode,
@@ -48,7 +49,7 @@ def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.01,
     return nu, spect
 
 
-def plot_cars(nu=None, spect=None):
+def plot_cars(nu=None, spect=None, y_scale="Linear"):
     if nu is None and spect is None:
         nu, spect = synthesize_cars()
     nu = np.array(nu)
@@ -65,5 +66,7 @@ def plot_cars(nu=None, spect=None):
                       margin={'l': 20, 'b': 10, 'r': 10, 't': 10},
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]")
+    if y_scale == "Log":
+        fig.update_yaxes(type="log", range=[-3.1, 0.2], dtick=1)
 
     return fig
