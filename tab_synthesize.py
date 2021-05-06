@@ -335,7 +335,7 @@ card_setting = dbc.Col(
         style={"height": "540px"},
         className="border-0"
     ),
-    width=12,
+    xs=12,
     md=5,
     className="tab-col mb-2",
 )
@@ -393,7 +393,7 @@ card_synth = dbc.Col(
         style={"height": "540px"},
         className="border-0"
     ),
-    width=12,
+    xs=12,
     md=7,
     className="tab-col mb-2"
 )
