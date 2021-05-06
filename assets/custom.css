@@ -2,10 +2,6 @@ body{
     background: rgb(240, 240, 240);
 }
 
-meta{
-    content: "width=device-width, initial-scale=1";
-}
-
 .tab-col{
     padding-left: 5px;
     padding-right: 5px;
