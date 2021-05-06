@@ -149,6 +149,7 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
     return tab_models
 
 
+# make the settings tabs always with settings stored in the memories
 @app.callback(
     Output("synth-settings-card", "children"),
     Input("synth-settings", "active_tab"),
@@ -170,6 +171,7 @@ def tab_content(active_tab, data_1, data_2):
                                data_2["pump_lw"], data_2["num_sample"])
 
 
+# reset the reset button n_clicks to 0 when switching between settings tabs
 @app.callback(
     Output("reset-button", "n_clicks"),
     Input("synth-settings", "active_tab"),
@@ -179,6 +181,7 @@ def re_zero(active_tab):
         return 0
 
 
+# store input conditions into the memory
 @app.callback(
     Output("memory-settings-conditions", "data"),
     [
@@ -210,6 +213,7 @@ def update_memory_conditions(P, T, x_N2, x_Ar, x_H2, x_O2, x_CO2, x_CO, x_H2O,
     return data
 
 
+# reset the conditions tab when clicking the reset button
 @app.callback(
     [
         Output('P-input', 'value'),
@@ -224,7 +228,7 @@ def update_memory_conditions(P, T, x_N2, x_Ar, x_H2, x_O2, x_CO2, x_CO, x_H2O,
         Output('x-CH4', 'value'),
     ],
     Input('reset-button', 'n_clicks'),
-    State("memory-settings-conditions", "data"),
+    State("memory-settings-conditions", "data"),  # maybe not necessary
 )
 def reset_conditions(n, data):
     if n > 0:
@@ -236,6 +240,7 @@ def reset_conditions(n, data):
     return _settings
 
 
+# store models settings in the memory
 @app.callback(
     Output("memory-settings-models", "data"),
     [
@@ -263,6 +268,7 @@ def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
     return data
 
 
+# reset models settings when clicking the reset button
 @app.callback(
     [
         Output('pump_ls-select', 'value'),
@@ -286,6 +292,7 @@ def reset_models(n, data):
     return _settings
 
 
+# plot spectrum and save spectrum data in memory
 @app.callback(
     [
         Output("memory-synth-spectrum", "data"),
@@ -398,6 +405,7 @@ card_synth = dbc.Col(
     className="tab-col mb-2"
 )
 
+# combine the two cards together
 tab_synth = dbc.Row(
     [
         card_setting,
