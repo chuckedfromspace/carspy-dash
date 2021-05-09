@@ -42,3 +42,5 @@ body{
   border-color: #2780e3;
   box-shadow: 0 0 8px #2780e3;
 }
+
+img[alt=demo_gif_1] { width: 95%; }
