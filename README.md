@@ -7,6 +7,10 @@ the effect of laser linewidth on the CARS spectra (cross-coherence), etc. It is 
 This web app is built with [Dash](https://dash.plotly.com) to demonstrate the most basic functions of CARSpy.
 The computation/loading speed is largely limited by the cloud server. To get the best performance, follow the steps below to run the app locally.
 
+## Screenshots
+
+![demo_gif_1](assets/demo1.gif)
+
 ## How to run this app
 
 We suggest you to create a virtual environment for running this app with Python 3. Clone this repository
