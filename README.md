@@ -13,10 +13,10 @@ The computation/loading speed is largely limited by the cloud server. To get the
 
 ## How to run this app
 
-We suggest you to create a virtual environment for running this app with Python 3. Clone this repository
+It is best to create a virtual environment for running this app with Python 3. Clone this repository
 and open your terminal/command prompt in the root folder.
 
-```console
+```bash
 git clone https://github.com/chuckedfromspace/carspy-dash
 cd carspy-dash
 python3 -m virtualenv venv
@@ -24,25 +24,25 @@ python3 -m virtualenv venv
 
 In Unix system:
 
-```console
+```bash
 source venv/bin/activate
 ```
 
 In Windows:
 
-```console
+```cmd
 venv\Scripts\activate
 ```
 
 Install all required packages by running:
 
-```console
+```bash
 pip install -r requirements.txt
 ```
 
 Run this app locally with:
 
-```console
+```bash
 python index.py
 ```
 
@@ -50,7 +50,7 @@ python index.py
 
 If you are ready to work on your actual experimental data, simply install CARSpy via
 
-```console
+```bash
 pip install carspy
 ```
 
