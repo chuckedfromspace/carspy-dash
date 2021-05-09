@@ -38,7 +38,7 @@ def popup_modal(card_name, src=None, description="",
         id=modal_id,
         size="lg",
         centered=True,
-        backdrop="static"
+        # backdrop="static"
     )
     return modal
 
