@@ -5,7 +5,8 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 
 from app import app
-
+from tab_synthesize import tab_synth
+from tab_fit import tab_fit
 
 # callback for collapsing menu
 @app.callback(
@@ -72,6 +73,18 @@ for _modal, _button, _close in zip(
         [Input(_button, "n_clicks"), Input(_close, "n_clicks")],
         [State(_modal, "is_open")],
     )(toggle_modal)
+
+
+# generate nav tabs
+@app.callback(
+    Output("main-content", "children"),
+    Input("nav-tabs", "active_tab"),
+)
+def tab_content(active_tab):
+    if active_tab == "nav-tab-synthesize":
+        return tab_synth
+    elif active_tab == "nav-tab-fit":
+        return tab_fit
 
 
 # load the markdown file
@@ -212,6 +225,7 @@ navbar_tabs = dbc.Container(
     dbc.Tabs(
         [
             dbc.Tab(
+                tab_id="nav-tab-synthesize",
                 label="Synthesize",
                 tab_style={
                     "margin-left": 10,
@@ -223,20 +237,23 @@ navbar_tabs = dbc.Container(
                     },
             ),
             dbc.Tab(
+                tab_id="nav-tab-fit",
                 label="Least-Square Fit",
                 activeLabelClassName="border-primary font-weight-bold",
                 active_label_style={
                     "background-color": "rgb(240,240,240)",
                     "border-width": "0px 0px 2px 0px",
                     },
-                disabled=True
             ),
         ],
+        id="nav-tabs",
+        active_tab="nav-tab-synthesize",
         className="pt-2"
     ),
     fluid=False,
     className="mb-3"
 )
+
 navbar = dbc.Container(
     [
         dbc.Navbar(

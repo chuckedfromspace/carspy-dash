@@ -4,7 +4,6 @@ import dash_bootstrap_components as dbc
 
 from app import app
 from navbar import navbar, navbar_tabs
-from tab_synthesize import tab_synth
 from utils import DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS
 
 server = app.server
@@ -37,9 +36,7 @@ app.layout = html.Div(
             navbar,
             navbar_tabs,
             dbc.Container(
-                [
-                    tab_synth
-                ],
+                id="main-content",
                 fluid=False
             ),
             footer,
