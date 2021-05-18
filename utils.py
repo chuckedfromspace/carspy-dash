@@ -1,4 +1,6 @@
+from pathlib import Path
 from carspy import CarsSpectrum
+from carspy.utils import pkl_load
 import numpy as np
 import plotly.graph_objects as go
 
@@ -27,6 +29,11 @@ DEFAULT_SETTINGS_MODELS = {
     "convol": "Yuratich",
     "doppler_effect": "disable"
 }
+
+SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
+FIG_PATH = Path(__file__).parent / "_data/_DEFAULT_FIG"
+DEFAULT_SPECTRUM = pkl_load(SPECT_PATH)
+DEFAULT_FIG = pkl_load(FIG_PATH)
 
 
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
