@@ -1,7 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import dash
 import dash_bootstrap_components as dbc
 
 from app import app
@@ -303,18 +302,15 @@ def reset_models(n, data):
         Input("memory-settings-models", "data"),
         Input("change-y-scale", "value")
     ],
-    State("memory-synth-spectrum", "data")
 )
-def update_synth_spectrum(data_1, data_2, y_scale, spect_memo):
-    ctx = dash.callback_context
-    if ctx.triggered[0]['prop_id'].split('.')[0] == "change-y-scale":
-        nu, spect = spect_memo
+def update_synth_spectrum(data_1, data_2, y_scale):
+    # ctx = dash.callback_context
+    # if ctx.triggered[0]['prop_id'].split('.')[0] == "change-y-scale":
+    if data_2["doppler_effect"] == "enable":
+        data_2["doppler_effect"] = True
     else:
-        if data_2["doppler_effect"] == "enable":
-            data_2["doppler_effect"] = True
-        else:
-            data_2["doppler_effect"] = False
-        nu, spect = synthesize_cars(**data_1, **data_2)
+        data_2["doppler_effect"] = False
+    nu, spect = synthesize_cars(**data_1, **data_2)
     figure = plot_cars(nu, spect, y_scale)
     return [nu, spect], figure
 
