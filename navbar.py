@@ -8,6 +8,7 @@ from app import app
 from tab_synthesize import tab_synth
 from tab_fit import tab_fit
 
+
 # callback for collapsing menu
 @app.callback(
     Output("navbar-collapse", "is_open"),
@@ -185,6 +186,7 @@ navbar_title = dbc.Container(
                             ),
                             "",
                         ],
+                        target="_blank",
                         href="https://github.com/chuckedfromspace/"
                              + "carspy-dash",
                     ),
@@ -197,6 +199,7 @@ navbar_title = dbc.Container(
                             ),
                             "",
                         ],
+                        target="_blank",
                         href="https://carspy.readthedocs.io/"
                     ),
                     dbc.NavLink(
@@ -208,6 +211,7 @@ navbar_title = dbc.Container(
                             ),
                             "",
                         ],
+                        target="_blank",
                         href="https://pypi.org/project/carspy/"
                     ),
                 ],
