@@ -2,7 +2,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-import dash
 
 from app import app
 from utils import (DEFAULT_SETTINGS_CONDITIONS, plot_cars, synthesize_cars,
@@ -292,31 +291,35 @@ def reset_models(n, data):
     return _settings
 
 
-# plot spectrum and save spectrum data in memory
+# create and save spectrum data in memory
 @app.callback(
-    [
-        Output("memory-synth-spectrum", "data"),
-        Output("synth-signal", "figure"),
-    ],
+    Output("memory-synth-spectrum", "data"),
     [
         Input("memory-settings-conditions", "data"),
         Input("memory-settings-models", "data"),
+    ],
+)
+def update_synth_spectrum(data_1, data_2):
+    if data_2["doppler_effect"] == "enable":
+        data_2["doppler_effect"] = True
+    else:
+        data_2["doppler_effect"] = False
+    nu, spect = synthesize_cars(**data_1, **data_2)
+    return [nu, spect]
+
+
+# plot spectrum from data stored in memory
+@app.callback(
+    Output("synth-signal", "figure"),
+    [
+        Input("memory-synth-spectrum", "data"),
         Input("change-y-scale", "value")
     ],
-    State("memory-synth-spectrum", "data"),
 )
-def update_synth_spectrum(data_1, data_2, y_scale, spect_memo):
-    ctx = dash.callback_context
-    if ctx.triggered[0]['prop_id'].split('.')[0] == "change-y-scale":
-        nu, spect = spect_memo
-    else:
-        if data_2["doppler_effect"] == "enable":
-            data_2["doppler_effect"] = True
-        else:
-            data_2["doppler_effect"] = False
-        nu, spect = synthesize_cars(**data_1, **data_2)
+def update_synth_plot(spect_memo, y_scale):
+    nu, spect = spect_memo
     figure = plot_cars(nu, spect, y_scale)
-    return [nu, spect], figure
+    return figure
 
 
 # setting panels
