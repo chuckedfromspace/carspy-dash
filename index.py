@@ -4,7 +4,8 @@ import dash_bootstrap_components as dbc
 
 from app import app
 from navbar import navbar, navbar_tabs
-from utils import DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS
+from utils import (DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS,
+                   DEFAULT_SPECTRUM)
 
 server = app.server
 
@@ -31,7 +32,8 @@ app.layout = html.Div(
                 data=DEFAULT_SETTINGS_MODELS
             ),
             dcc.Store(
-                id="memory-synth-spectrum"
+                id="memory-synth-spectrum",
+                data=DEFAULT_SPECTRUM
             ),
             navbar,
             navbar_tabs,
