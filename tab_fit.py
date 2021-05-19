@@ -36,6 +36,9 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h):
             ],
             className="mt-2 mb-2"
         ),
+        dcc.Graph(
+            id="graph-slit-function"
+        )
     ]
     return tab_slit
 
@@ -71,6 +74,21 @@ def make_tab_origin():
         )
     ]
     return tab_origin
+
+
+# disable input based on slit function
+@app.callback(
+    [
+        Output("sigma_L_l", "disabled"),
+        Output("sigma_L_h", "disabled"),
+    ],
+    Input("slit-select", "value")
+)
+def disable_slit_input(value):
+    if value == "sGaussian":
+        return True, True
+    else:
+        return False, False
 
 
 # make the settings tabs always with settings stored in the memories
