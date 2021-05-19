@@ -151,9 +151,11 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
 # make the settings tabs always with settings stored in the memories
 @app.callback(
     Output("synth-settings-card", "children"),
-    Input("synth-settings", "active_tab"),
-    State("memory-settings-conditions", "data"),
-    State("memory-settings-models", "data"),
+    [
+        Input("synth-settings", "active_tab"),
+        Input("memory-settings-conditions", "data"),
+        Input("memory-settings-models", "data"),
+    ]
 )
 def tab_content(active_tab, data_1, data_2):
     if active_tab == "synth-settings-1":
