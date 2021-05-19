@@ -4,8 +4,8 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from app import app
-from utils import (DEFAULT_SETTINGS_CONDITIONS, plot_cars, synthesize_cars,
-                   DEFAULT_SETTINGS_MODELS, DEFAULT_FIG)
+from utils import (plot_cars, plot_placeholder, synthesize_cars,
+                   DEFAULT_SETTINGS_MODELS, DEFAULT_SETTINGS_CONDITIONS)
 
 
 def synth_mode_select(name, id_addon, id_select, options, tooltiptext,
@@ -384,7 +384,7 @@ card_synth = dbc.Col(
                     ),
                     dbc.Spinner(
                         dcc.Graph(id="synth-signal",
-                                  figure=DEFAULT_FIG,
+                                  figure=plot_placeholder(),
                                   className="mt-2"),
                         color="primary"
                     ),

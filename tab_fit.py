@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from app import app
-from utils import plot_cars, DEFAULT_FIG
+from utils import plot_cars, plot_placeholder
 from tab_synthesize import synth_mode_select, synth_inputs
 
 
@@ -37,7 +37,8 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h):
             className="mt-2 mb-2"
         ),
         dcc.Graph(
-            id="graph-slit-function"
+            id="graph-slit-function",
+            figure=plot_placeholder(200)
         )
     ]
     return tab_slit
@@ -56,7 +57,7 @@ def make_tab_origin():
             id="change-y-scale"
         ),
         dbc.Spinner(
-            dcc.Graph(id="synth-signal", figure=DEFAULT_FIG,
+            dcc.Graph(id="synth-signal", figure=plot_placeholder(400),
                       className="mt-2"),
             color="primary"
         ),
@@ -89,6 +90,9 @@ def disable_slit_input(value):
         return True, True
     else:
         return False, False
+
+
+# plot slit graph
 
 
 # make the settings tabs always with settings stored in the memories

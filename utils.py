@@ -1,6 +1,7 @@
 from pathlib import Path
 from carspy import CarsSpectrum
 from carspy.utils import pkl_load
+from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
 import plotly.graph_objects as go
 
@@ -40,9 +41,7 @@ DEFAULT_SETTINGS_SLIT = {
 }
 
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
-FIG_PATH = Path(__file__).parent / "_data/_DEFAULT_FIG"
 DEFAULT_SPECTRUM = pkl_load(SPECT_PATH)
-DEFAULT_FIG = pkl_load(FIG_PATH)
 
 
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
@@ -83,10 +82,46 @@ def plot_cars(nu=None, spect=None, y_scale="Linear"):
 
     fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
     fig.update_layout(height=400,
-                      margin={'l': 20, 'b': 10, 'r': 10, 't': 10},
+                      margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]")
     if y_scale == "Log":
         fig.update_yaxes(type="log", range=[-2.5, 0.2], dtick=1)
+
+    return fig
+
+
+def plot_slit(nu, parameters, lineshape="sGaussian"):
+    if lineshape == "sGaussian":
+        spect = asym_Gaussian(nu, 1/2*(nu[0] + nu[-1]), **parameters[:4])
+    elif lineshape == "sVoigt":
+        spect = asym_Gaussian(nu, 1/2*(nu[0] + nu[-1]), **parameters)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=nu, y=spect/spect.max(),
+        mode='lines',
+    ))
+
+    fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
+    fig.update_layout(height=200,
+                      margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
+                      xaxis_title="Wavenumber [1/cm]",
+                      yaxis_title="Signal [-]")
+
+    return fig
+
+
+def plot_placeholder(height=400):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=[0], y=[0],
+        mode='lines',
+    ))
+
+    fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
+    fig.update_layout(height=height,
+                      margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
+                      xaxis_title="Wavenumber [1/cm]",
+                      yaxis_title="Signal [-]")
 
     return fig
