@@ -4,17 +4,17 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from app import app
-from utils import plot_cars, plot_placeholder
+from utils import DEFAULT_SETTINGS_SLIT, plot_cars, plot_placeholder, plot_slit
 from tab_synthesize import synth_mode_select, synth_inputs
 
 
 # slit function settings tab
-def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h):
+def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h, slit):
     tab_slit = [
         synth_mode_select("Slit function", "slit-addon", "slit-select",
                           ["sGaussian", "sVoigt"],
                           "Choose the type of slit function",
-                          "sGaussian"),
+                          slit),
         dbc.Row(
             [
                 dbc.Col(
@@ -28,7 +28,7 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h):
                 dbc.Col(
                     [
                         synth_inputs("a_sigma", "a_sigma", a_sigma),
-                        synth_inputs("a_k", "a-k", a_k),
+                        synth_inputs("a_k", "a_k", a_k),
                         synth_inputs("sigma_L_h", "sigma_L_h", sigma_L_h),
                     ],
                     className="tab-col pr-3"
@@ -38,7 +38,7 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h):
         ),
         dcc.Graph(
             id="graph-slit-function",
-            figure=plot_placeholder(200)
+            figure=plot_placeholder(280)
         )
     ]
     return tab_slit
@@ -93,6 +93,74 @@ def disable_slit_input(value):
 
 
 # plot slit graph
+@app.callback(
+    Output("graph-slit-function", "figure"),
+    [
+        Input("memory-settings-slit", "data"),
+        Input("memory-synth-spectrum", "data"),
+    ],
+)
+def update_slit_func(parameters, spect_memo):
+    nu, _ = spect_memo
+    return plot_slit(nu, parameters)
+
+
+# update slit settings
+@app.callback(
+    Output("memory-settings-slit", "data"),
+    [
+        Input('sigma', 'value'),
+        Input('a_sigma', 'value'),
+        Input('k', 'value'),
+        Input('a_k', 'value'),
+        Input('sigma_L_l', 'value'),
+        Input('sigma_L_h', 'value'),
+        Input('slit-select', 'value')
+    ],
+    State("memory-settings-slit", "data"),
+)
+def update_memory_slit(sigma, a_sigma, k, a_k, sigma_L_l, sigma_L_h,
+                       slit_shape, data):
+    data["sigma"] = float(sigma)
+    data["a_sigma"] = float(a_sigma)
+    data["k"] = float(k)
+    data["a_k"] = float(a_k)
+    data["sigma_L_l"] = float(sigma_L_l)
+    data["sigma_L_h"] = float(sigma_L_h)
+    data["slit"] = slit_shape
+    return data
+
+
+# update slit settings
+@app.callback(
+    [
+        Output('sigma', 'value'),
+        Output('a_sigma', 'value'),
+        Output('k', 'value'),
+        Output('a_k', 'value'),
+        Output('sigma_L_l', 'value'),
+        Output('sigma_L_h', 'value'),
+        Output('slit-select', 'value')
+    ],
+    Input('reset-button-fit', 'n_clicks'),
+    State("memory-settings-slit", "data"),
+)
+def reset_slit(n, data):
+    if n > 0:
+        data = DEFAULT_SETTINGS_SLIT
+    _settings = [data["sigma"], data["a_sigma"], data["k"], data["a_k"],
+                 data["sigma_L_l"], data["sigma_L_h"], data["slit"]]
+    return _settings
+
+
+# reset the reset button n_clicks to 0 when switching between settings tabs
+@app.callback(
+    Output("reset-button-fit", "n_clicks"),
+    Input("fit-settings", "active_tab"),
+)
+def re_zero(active_tab):
+    if active_tab:
+        return 0
 
 
 # make the settings tabs always with settings stored in the memories
@@ -132,7 +200,7 @@ card_setting = dbc.Col(
                     ],
                     id="fit-settings",
                     card=True,
-                    active_tab="fit-settings-1",
+                    active_tab="fit-settings-2",
                 ),
                 style={"background-color": "#e9ecef"}
             ),

@@ -36,8 +36,14 @@ DEFAULT_SETTINGS_SLIT = {
     "k": 1.2,
     "a_sigma": 0.14,
     "a_k": 0,
-    "sigma_L_l": 0,
+    "sigma_L_l": 1.0,
     "sigma_L_h": 0,
+    "slit": "sGaussian"
+}
+
+DEFAULT_SETTINGS_FIT = {
+    "power_factor": 0,
+    "downsample": "local_mean",
 }
 
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
@@ -91,11 +97,17 @@ def plot_cars(nu=None, spect=None, y_scale="Linear"):
     return fig
 
 
-def plot_slit(nu, parameters, lineshape="sGaussian"):
+def plot_slit(nu, parameters):
+    lineshape = parameters["slit"]
+    parameters.pop("slit")
     if lineshape == "sGaussian":
-        spect = asym_Gaussian(nu, 1/2*(nu[0] + nu[-1]), **parameters[:4])
+        parameters = {key: parameters[key]
+                      for key in list(parameters.keys())[:4]}
+        spect = asym_Gaussian(np.array(nu), 1/2*(nu[0] + nu[-1]),
+                              **parameters, offset=0)
     elif lineshape == "sVoigt":
-        spect = asym_Gaussian(nu, 1/2*(nu[0] + nu[-1]), **parameters)
+        spect = asym_Voigt(np.array(nu), 1/2*(nu[0] + nu[-1]),
+                           **parameters, offset=0)
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=nu, y=spect/spect.max(),
@@ -103,7 +115,7 @@ def plot_slit(nu, parameters, lineshape="sGaussian"):
     ))
 
     fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
-    fig.update_layout(height=200,
+    fig.update_layout(height=280,
                       margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]")
