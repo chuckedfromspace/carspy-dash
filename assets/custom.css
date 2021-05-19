@@ -19,6 +19,14 @@ body{
     opacity: 0.5;
 }
 
+#graph-slit-function > div {
+    visibility: visible;
+}
+
+#graph-slit-function[data-dash-is-loading="true"] > div {
+    opacity: 0.5;
+}
+
 ._dash-loading{
     color: #2780e3;
     font-size: 30px;

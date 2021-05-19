@@ -36,10 +36,14 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h, slit):
             ],
             className="mt-2 mb-2"
         ),
-        dcc.Graph(
-            id="graph-slit-function",
-            figure=plot_placeholder(280)
+        dbc.Spinner(
+            dcc.Graph(
+                id="graph-slit-function",
+                figure=plot_placeholder(280)
+            ),
+            color="primary"
         )
+
     ]
     return tab_slit
 
@@ -158,7 +162,7 @@ def reset_slit(n, data):
     Output("reset-button-fit", "n_clicks"),
     Input("fit-settings", "active_tab"),
 )
-def re_zero(active_tab):
+def re_zero_fit(active_tab):
     if active_tab:
         return 0
 
@@ -166,10 +170,8 @@ def re_zero(active_tab):
 # make the settings tabs always with settings stored in the memories
 @app.callback(
     Output("fit-settings-card", "children"),
-    [
-        Input("fit-settings", "active_tab"),
-        Input("memory-settings-slit", "data")
-    ]
+    Input("fit-settings", "active_tab"),
+    State("memory-settings-slit", "data")
 )
 def fit_settings_tab_content(active_tab, data_2):
     if active_tab == "fit-settings-2":
