@@ -30,6 +30,15 @@ DEFAULT_SETTINGS_MODELS = {
     "doppler_effect": "disable"
 }
 
+DEFAULT_SETTINGS_SLIT = {
+    "sigma": 1.2,
+    "k": 1.2,
+    "a_sigma": 0.14,
+    "a_k": 0,
+    "sigma_L_l": 0,
+    "sigma_L_h": 0,
+}
+
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
 FIG_PATH = Path(__file__).parent / "_data/_DEFAULT_FIG"
 DEFAULT_SPECTRUM = pkl_load(SPECT_PATH)
