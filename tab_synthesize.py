@@ -151,11 +151,9 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
 # make the settings tabs always with settings stored in the memories
 @app.callback(
     Output("synth-settings-card", "children"),
-    [
-        Input("synth-settings", "active_tab"),
-        Input("memory-settings-conditions", "data"),
-        Input("memory-settings-models", "data"),
-    ]
+    Input("synth-settings", "active_tab"),
+    State("memory-settings-conditions", "data"),
+    State("memory-settings-models", "data"),
 )
 def tab_content(active_tab, data_1, data_2):
     if active_tab == "synth-settings-1":
@@ -229,7 +227,7 @@ def update_memory_conditions(P, T, x_N2, x_Ar, x_H2, x_O2, x_CO2, x_CO, x_H2O,
         Output('x-CH4', 'value'),
     ],
     Input('reset-button', 'n_clicks'),
-    State("memory-settings-conditions", "data"),  # maybe not necessary
+    State("memory-settings-conditions", "data"),
 )
 def reset_conditions(n, data):
     if n > 0:
@@ -252,8 +250,8 @@ def reset_conditions(n, data):
         Input('pump_lw-input', 'value'),
         Input('spectral-range', 'value'),
         Input('num_sample-input', 'value'),
-        State("memory-settings-models", "data"),
-    ]
+    ],
+    State("memory-settings-models", "data"),
 )
 def update_memory_models(pump_ls, chi_rs, convol, doppler_effect, pump_lw,
                          spectral_range, num_sample, data):
