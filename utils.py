@@ -1,5 +1,5 @@
 from pathlib import Path
-from carspy import CarsSpectrum
+from carspy import CarsSpectrum, CarsFit
 from carspy.utils import pkl_load, downsample
 from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
@@ -177,3 +177,54 @@ def plot_fitting(nu, spect, nu_start, nu_end, sample_length, noise_level,
                       yaxis_title="Signal [-]",
                       xaxis_range=[nu_start, nu_end])
     return fig
+
+
+def least_sqrt_fit(nu_expt, spect_expt, slit_parameters, settings_models,
+                   settings_conditions):
+    modes = {
+        'power_factor': 0,
+        'downsample': 'local_mean',
+        'slit': slit_parameters['slit'],
+        'pump_ls': settings_models['pump_ls'],
+        'chi_rs': settings_models['chi_rs'],
+        'convol': settings_models['convol'],
+        'doppler_effect': settings_models['doppler_effect'],
+        'chem_eq': False,
+        'fit': 'custom'
+    }
+
+    init_comp = settings_conditions['comp']
+    fit_expt = CarsFit(np.array(spect_expt), np.array(nu_expt),
+                       fit_mode=modes, ref_fac=80,
+                       init_comp=init_comp)
+    fit_expt.preprocess()
+    if slit_parameters['slit'] == "sGaussian":
+        params = (
+            ('temperature', 1500, True, 250, 3000),
+            ('del_Tv', 0, False),
+            ('x_mol', init_comp['N2'], False),
+            ('nu_shift', 0, True, -1, 1),
+            ('nu_stretch', 1, False),
+            ('pump_lw', 0.2, False),
+            ('param1', slit_parameters['sigma'], False),
+            ('param2', slit_parameters['k'], False),
+            ('param3', slit_parameters['a_sigma'], False),
+            ('param4', slit_parameters['a_k'], False)
+        )
+    else:
+        params = (
+            ('temperature', 1500, True, 250, 3000),
+            ('del_Tv', 0, False),
+            ('x_mol', init_comp['N2'], False),
+            ('nu_shift', 0, True, -1, 1),
+            ('nu_stretch', 1, False),
+            ('pump_lw', settings_models['pump_lw'], False),
+            ('param1', slit_parameters['sigma'], False),
+            ('param2', slit_parameters['k'], False),
+            ('param3', slit_parameters['a_sigma'], False),
+            ('param4', slit_parameters['a_k'], False),
+            ('param5', slit_parameters['sigma_L_l'], False),
+            ('param6', slit_parameters['sigma_L_h'], False)
+        )
+    fit_expt.ls_fit(add_params=params, show_fit=False)
+    return fit_expt.fit_result

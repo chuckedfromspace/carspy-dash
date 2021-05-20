@@ -37,6 +37,9 @@ app.layout = html.Div(
                 data=DEFAULT_SPECTRUM
             ),
             dcc.Store(
+                id="memory-fit-signal",
+            ),
+            dcc.Store(
                 id="memory-settings-slit",
                 data=DEFAULT_SETTINGS_SLIT
             ),

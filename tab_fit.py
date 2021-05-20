@@ -2,10 +2,10 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-
+import time
 from app import app
 from utils import (DEFAULT_SETTINGS_SLIT, DEFAULT_SETTINGS_FIT, plot_fitting,
-                   plot_placeholder, plot_slit)
+                   plot_placeholder, plot_slit, least_sqrt_fit)
 from tab_synthesize import synth_mode_select, synth_inputs, input_slider
 
 
@@ -72,6 +72,18 @@ def make_tab_fit(sample_length, noise_level, offset):
             ],
             className="mt-2 mb-2"
         ),
+        dbc.Button(
+            [
+               dbc.Spinner(html.Div("Start fit", id="fitting-status"),
+                           size="sm")
+            ],
+            id="start-fit-button", n_clicks=0,
+            color="primary"
+        ),
+        dbc.Button(
+            "Show fit", id="show-fit-button", n_clicks=0,
+            color="primary", disabled=True, className="float-right"
+        )
     ]
     return tab_fit
 
@@ -306,6 +318,33 @@ def update_fit_spectrum(active_tab):
         return make_tab_origin()
     elif active_tab == "tab-fit-signal":
         return make_tab_fitting()
+
+
+# perform a fit
+@app.callback(
+    [
+        Output("fitting-status", "children"),
+        Output("memory-fit-signal", "data"),
+    ],
+    [
+        Input("start-fit-button", "n_clicks"),
+        Input("fit-signal", "figure"),
+    ],
+    State("memory-settings-slit", "data"),
+    State("memory-settings-models", "data"),
+    State("memory-settings-conditions", "data"),
+)
+def update_fit(n_clicks, figure, slit_parameters, settings_models,
+               settings_conditions):
+    fit_result = []
+    if n_clicks:
+        fit_result = least_sqrt_fit(
+                        figure['data'][0]['x'],
+                        figure['data'][0]['y'],
+                        slit_parameters,
+                        settings_models,
+                        settings_conditions)
+    return "Start fit", fit_result
 
 
 # settings panels
