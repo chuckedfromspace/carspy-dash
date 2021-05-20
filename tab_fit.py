@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 
 from app import app
 from utils import DEFAULT_SETTINGS_SLIT, plot_cars, plot_placeholder, plot_slit
-from tab_synthesize import synth_mode_select, synth_inputs
+from tab_synthesize import synth_mode_select, synth_inputs, input_slider
 
 
 # slit function settings tab
@@ -46,6 +46,15 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h, slit):
 
     ]
     return tab_slit
+
+
+# fit settings tab
+def make_tab_fit(nu_start, nu_end, sample_length):
+    tab_fit = [
+        input_slider("Sample length",
+                     "sample_length-input", sample_length, 60, 240, 20)
+    ]
+    return tab_fit
 
 
 # original signal tab
@@ -171,9 +180,12 @@ def re_zero_fit(active_tab):
 @app.callback(
     Output("fit-settings-card", "children"),
     Input("fit-settings", "active_tab"),
+    State("memory-settings-models", "data"),
     State("memory-settings-slit", "data")
 )
-def fit_settings_tab_content(active_tab, data_2):
+def fit_settings_tab_content(active_tab, data_1, data_2):
+    if active_tab == "fit-settings-1":
+        return make_tab_fit(data_1["nu_start"]-5, data_1["nu_end"]-5, 120)
     if active_tab == "fit-settings-2":
         return make_tab_slit(**data_2)
 
