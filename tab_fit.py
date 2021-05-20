@@ -284,12 +284,15 @@ def fit_settings_tab_content(active_tab, data_1, data_2):
         Input("memory-synth-spectrum", "data"),
         Input("memory-settings-fit", "data"),
         Input("memory-settings-models", "data"),
+        Input("change-line-style", "value"),
     ],
 )
-def update_fitting_graph(slit_parameters, spect_memo, fit_settings, data_1):
+def update_fitting_graph(slit_parameters, spect_memo, fit_settings, data_1,
+                         mode):
     nu, spect = spect_memo
     fig = plot_fitting(nu, spect, data_1['nu_start'], data_1['nu_end'],
-                       **fit_settings, slit_parameters=slit_parameters)
+                       **fit_settings, slit_parameters=slit_parameters,
+                       mode=mode)
     return fig
 
 

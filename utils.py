@@ -32,10 +32,10 @@ DEFAULT_SETTINGS_MODELS = {
 }
 
 DEFAULT_SETTINGS_SLIT = {
-    "sigma": 2.5,
-    "k": 2.0,
+    "sigma": 1.2,
+    "k": 1.2,
     "a_sigma": 0.2,
-    "a_k": 1.0,
+    "a_k": 0.5,
     "sigma_L_l": 0.2,
     "sigma_L_h": 0.4,
     "slit": "sGaussian"
@@ -43,8 +43,8 @@ DEFAULT_SETTINGS_SLIT = {
 
 DEFAULT_SETTINGS_FIT = {
     "sample_length": 120,
-    "noise_level": 0,
-    "offset": 0
+    "noise_level": 1.5,
+    "offset": 0.5
 }
 
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
@@ -174,5 +174,6 @@ def plot_fitting(nu, spect, nu_start, nu_end, sample_length, noise_level,
     fig.update_layout(height=400,
                       margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
                       xaxis_title="Wavenumber [1/cm]",
-                      yaxis_title="Signal [-]")
+                      yaxis_title="Signal [-]",
+                      xaxis_range=[nu_start, nu_end])
     return fig
