@@ -4,7 +4,8 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 
 from app import app
-from utils import DEFAULT_SETTINGS_SLIT, plot_cars, plot_placeholder, plot_slit
+from utils import (DEFAULT_SETTINGS_SLIT, DEFAULT_SETTINGS_FIT, plot_fitting,
+                   plot_placeholder, plot_slit)
 from tab_synthesize import synth_mode_select, synth_inputs, input_slider
 
 
@@ -49,10 +50,28 @@ def make_tab_slit(sigma, k, a_sigma, a_k, sigma_L_l, sigma_L_h, slit):
 
 
 # fit settings tab
-def make_tab_fit(nu_start, nu_end, sample_length):
+def make_tab_fit(sample_length, noise_level, offset):
     tab_fit = [
         input_slider("Sample length",
-                     "sample_length-input", sample_length, 60, 240, 20)
+                     "sample_length", sample_length, 60, 240, 20),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        synth_inputs("noise_level", "noise_level",
+                                     noise_level),
+                    ],
+                    className="tab-col pl-3"
+                ),
+                dbc.Col(
+                    [
+                        synth_inputs("offset", "offset", offset),
+                    ],
+                    className="tab-col pr-3"
+                ),
+            ],
+            className="mt-2 mb-2"
+        ),
     ]
     return tab_fit
 
@@ -90,6 +109,39 @@ def make_tab_origin():
     return tab_origin
 
 
+# fit signal tab
+def make_tab_fitting():
+    tab_fitting = [
+        dbc.RadioItems(
+            options=[
+                {"label": "Markers", "value": "markers"},
+                {"label": "Line", "value": "lines"},
+            ],
+            value="markers",
+            inline=True,
+            id="change-line-style"
+        ),
+        dbc.Spinner(
+            dcc.Graph(id="fit-signal", figure=plot_placeholder(400),
+                      className="mt-2"),
+            color="primary"
+        ),
+        dbc.Button(
+            html.I(
+                title="Reset to default",
+                className="fas fa-undo-alt ml-0",
+                style={"font-size": "1.5em"},
+            ),
+            className="float-right p-0 shadow-none",
+            color="link",
+            size="sm",
+            id="reset-button-fit",
+            n_clicks=0,
+        )
+    ]
+    return tab_fitting
+
+
 # disable input based on slit function
 @app.callback(
     [
@@ -118,6 +170,40 @@ def update_slit_func(parameters, spect_memo):
     return plot_slit(nu, parameters)
 
 
+# update fit settings
+@app.callback(
+    Output("memory-settings-fit", "data"),
+    [
+        Input('sample_length', 'value'),
+        Input('noise_level', 'value'),
+        Input('offset', 'value'),
+    ],
+    State("memory-settings-fit", "data"),
+)
+def update_memory_fit(sample_length, noise_level, offset, data):
+    data["sample_length"] = float(sample_length)
+    data["noise_level"] = float(noise_level)
+    data["offset"] = float(offset)
+    return data
+
+
+# reset slit settings
+@app.callback(
+    [
+        Output('sample_length', 'value'),
+        Output('noise_level', 'value'),
+        Output('offset', 'value'),
+    ],
+    Input('reset-button-fit', 'n_clicks'),
+    State("memory-settings-fit", "data"),
+)
+def reset_fit(n, data):
+    if n > 0:
+        data = DEFAULT_SETTINGS_FIT
+    _settings = [data["sample_length"], data["noise_level"], data["offset"]]
+    return _settings
+
+
 # update slit settings
 @app.callback(
     Output("memory-settings-slit", "data"),
@@ -144,7 +230,7 @@ def update_memory_slit(sigma, a_sigma, k, a_k, sigma_L_l, sigma_L_h,
     return data
 
 
-# update slit settings
+# reset slit settings
 @app.callback(
     [
         Output('sigma', 'value'),
@@ -180,14 +266,31 @@ def re_zero_fit(active_tab):
 @app.callback(
     Output("fit-settings-card", "children"),
     Input("fit-settings", "active_tab"),
-    State("memory-settings-models", "data"),
+    State("memory-settings-fit", "data"),
     State("memory-settings-slit", "data")
 )
 def fit_settings_tab_content(active_tab, data_1, data_2):
     if active_tab == "fit-settings-1":
-        return make_tab_fit(data_1["nu_start"]-5, data_1["nu_end"]-5, 120)
+        return make_tab_fit(**data_1)
     if active_tab == "fit-settings-2":
         return make_tab_slit(**data_2)
+
+
+# plot fit signal
+@app.callback(
+    Output("fit-signal", "figure"),
+    [
+        Input("memory-settings-slit", "data"),
+        Input("memory-synth-spectrum", "data"),
+        Input("memory-settings-fit", "data"),
+        Input("memory-settings-models", "data"),
+    ],
+)
+def update_fitting_graph(slit_parameters, spect_memo, fit_settings, data_1):
+    nu, spect = spect_memo
+    fig = plot_fitting(nu, spect, data_1['nu_start'], data_1['nu_end'],
+                       **fit_settings, slit_parameters=slit_parameters)
+    return fig
 
 
 # createa graph tabs
@@ -198,6 +301,8 @@ def fit_settings_tab_content(active_tab, data_1, data_2):
 def update_fit_spectrum(active_tab):
     if active_tab == "tab-fit-origin":
         return make_tab_origin()
+    elif active_tab == "tab-fit-signal":
+        return make_tab_fitting()
 
 
 # settings panels
@@ -214,7 +319,7 @@ card_setting = dbc.Col(
                     ],
                     id="fit-settings",
                     card=True,
-                    active_tab="fit-settings-2",
+                    active_tab="fit-settings-1",
                 ),
                 style={"background-color": "#e9ecef"}
             ),
@@ -244,7 +349,7 @@ card_fit = dbc.Col(
                     ],
                     id="tab-fit-graph",
                     card=True,
-                    active_tab="tab-fit-origin"
+                    active_tab="tab-fit-signal"
                 ),
                 style={"background-color": "#e9ecef"}
             ),

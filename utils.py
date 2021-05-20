@@ -1,6 +1,6 @@
 from pathlib import Path
 from carspy import CarsSpectrum
-from carspy.utils import pkl_load
+from carspy.utils import pkl_load, downsample
 from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
 import plotly.graph_objects as go
@@ -22,8 +22,8 @@ DEFAULT_SETTINGS_CONDITIONS = {
 
 DEFAULT_SETTINGS_MODELS = {
     "pump_lw": 1.0,
-    "nu_start": 2250,
-    "nu_end": 2350,
+    "nu_start": 2262,
+    "nu_end": 2345,
     "num_sample": 10000,
     "pump_ls": "Gaussian",
     "chi_rs": "isolated",
@@ -32,18 +32,19 @@ DEFAULT_SETTINGS_MODELS = {
 }
 
 DEFAULT_SETTINGS_SLIT = {
-    "sigma": 1.2,
-    "k": 1.2,
-    "a_sigma": 0.14,
-    "a_k": 0,
-    "sigma_L_l": 1.0,
-    "sigma_L_h": 0,
+    "sigma": 2.5,
+    "k": 2.0,
+    "a_sigma": 0.2,
+    "a_k": 1.0,
+    "sigma_L_l": 0.2,
+    "sigma_L_h": 0.4,
     "slit": "sGaussian"
 }
 
 DEFAULT_SETTINGS_FIT = {
-    "power_factor": 0,
-    "downsample": "local_mean",
+    "sample_length": 120,
+    "noise_level": 0,
+    "offset": 0
 }
 
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
@@ -97,7 +98,7 @@ def plot_cars(nu=None, spect=None, y_scale="Linear"):
     return fig
 
 
-def plot_slit(nu, parameters):
+def slit_profile(nu, parameters):
     lineshape = parameters["slit"]
     parameters.pop("slit")
     if lineshape == "sGaussian":
@@ -108,6 +109,11 @@ def plot_slit(nu, parameters):
     elif lineshape == "sVoigt":
         spect = asym_Voigt(np.array(nu), 1/2*(nu[0] + nu[-1]),
                            **parameters, offset=0)
+    return spect
+
+
+def plot_slit(nu, parameters):
+    spect = slit_profile(nu, parameters)
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=nu, y=spect/spect.max(),
@@ -136,4 +142,37 @@ def plot_placeholder(height=400):
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]")
 
+    return fig
+
+
+def downsample_synth(nu, spect, nu_start, nu_end, sample_length, noise_level,
+                     offset, slit_parameters):
+    np.random.seed(42)
+    noise = np.random.rand(sample_length)
+    slit_fcn = slit_profile(nu, slit_parameters)
+    nu_expt = np.linspace(nu_start+2, nu_end-2, num=sample_length)
+    spect_conv = np.convolve(spect, slit_fcn, 'same')
+    spect_expt = (downsample(nu_expt, nu, spect_conv) + noise*noise_level
+                  - offset)
+
+    return nu_expt, spect_expt
+
+
+def plot_fitting(nu, spect, nu_start, nu_end, sample_length, noise_level,
+                 offset, slit_parameters, mode='markers'):
+    nu_expt, spect_expt = downsample_synth(nu, spect, nu_start, nu_end,
+                                           sample_length, noise_level,
+                                           offset, slit_parameters)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=nu_expt, y=spect_expt/spect_expt.max(),
+        mode=mode,
+        name="CARS Signal",
+    ))
+
+    fig.update_traces(hoverinfo='skip', selector=dict(type='scatter'))
+    fig.update_layout(height=400,
+                      margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
+                      xaxis_title="Wavenumber [1/cm]",
+                      yaxis_title="Signal [-]")
     return fig
