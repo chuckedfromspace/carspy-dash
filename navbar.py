@@ -251,7 +251,7 @@ navbar_tabs = dbc.Container(
             ),
         ],
         id="nav-tabs",
-        active_tab="nav-tab-synthesize",
+        active_tab="nav-tab-fit",
         className="pt-2"
     ),
     fluid=False,
