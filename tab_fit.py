@@ -92,7 +92,9 @@ def make_tab_fit(sample_length, noise_level, offset):
         html.Div(
             id="report",
             className="mt-2 border-0",
-            style={"overflow": "auto", "height": "280px"}
+            style={"overflow": "auto",
+                   "height": "280px",
+                   "background": "#e5ecf6"}
         )
     ]
     return tab_fit
