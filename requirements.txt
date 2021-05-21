@@ -1,3 +1,4 @@
+asteval==0.9.23
 Brotli==1.0.9
 carspy==0.4.2
 click==7.1.2
@@ -14,12 +15,17 @@ future==0.18.2
 gunicorn==20.1.0
 itsdangerous==1.1.0
 Jinja2==2.11.3
+lmfit==1.0.2
 MarkupSafe==1.1.1
 mccabe==0.6.1
 numpy==1.20.2
 plotly==4.14.3
 pycodestyle==2.7.0
 pyflakes==2.3.1
+python-dotenv==0.17.0
 retrying==1.3.3
+scipy==1.6.3
 six==1.15.0
+snowballstemmer==2.1.0
+uncertainties==3.1.5
 Werkzeug==1.0.1
