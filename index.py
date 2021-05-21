@@ -6,7 +6,7 @@ from app import app
 from navbar import navbar, navbar_tabs
 from utils import (DEFAULT_SETTINGS_CONDITIONS, DEFAULT_SETTINGS_MODELS,
                    DEFAULT_SPECTRUM, DEFAULT_SETTINGS_SLIT,
-                   DEFAULT_SETTINGS_FIT)
+                   DEFAULT_SETTINGS_FIT, DEFAULT_FIT_SIGNAL)
 
 server = app.server
 
@@ -38,6 +38,10 @@ app.layout = html.Div(
             ),
             dcc.Store(
                 id="memory-fit-signal",
+                data=DEFAULT_FIT_SIGNAL
+            ),
+            dcc.Store(
+                id="memory-fit-report",
             ),
             dcc.Store(
                 id="memory-settings-slit",
