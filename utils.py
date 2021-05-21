@@ -3,7 +3,7 @@ from carspy import CarsSpectrum, CarsFit
 from carspy.utils import pkl_load, downsample
 from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
-from lmfit.printfuncs import fit_report
+from lmfit.printfuncs import fit_report, fitreport_html_table
 import plotly.graph_objects as go
 
 INIT_COMP = {'N2': 0.79,
@@ -55,7 +55,7 @@ DEFAULT_FIT_SIGNAL = pkl_load(SIGNAL_PATH)
 
 
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
-                    nu_start=2250, nu_end=2350, num_sample=10000,
+                    nu_start=2262, nu_end=2345, num_sample=10000,
                     pump_ls='Gaussian', chi_rs='isolated',
                     convol='Y', doppler_effect=False, comp=None):
     synth_mode = {'pump_ls': pump_ls,
@@ -183,6 +183,7 @@ def add_fit_result(fig, nu, spect):
     fig.add_trace(go.Scatter(
         x=np.array(nu), y=np.array(spect)/np.array(spect).max(),
         mode="lines",
+        name="Best Fit"
     ))
     return fig
 
@@ -210,7 +211,7 @@ def least_sqrt_fit(nu_expt, spect_expt, slit_parameters, settings_models,
         ('temperature', 1500, True, 250, 3000),
         ('del_Tv', 0, False),
         ('x_mol', init_comp['N2'], False),
-        ('nu_shift', 0, True, -1, 1),
+        ('nu_shift', 0, False),
         ('nu_stretch', 1, False),
         ('pump_lw', 0.2, False),
         ('param1', slit_parameters['sigma'], False),
@@ -240,3 +241,8 @@ def unpack_lmfit(result):
         'dT': dT,
         'report': report
     }
+
+
+if __name__ == "__main__":
+    from carspy.utils import pkl_dump
+    pkl_dump("_DEFAULT_SPECTRUM", synthesize_cars())

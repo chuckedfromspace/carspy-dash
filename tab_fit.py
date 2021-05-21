@@ -1,7 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import dash
 import dash_bootstrap_components as dbc
 from app import app
 from utils import (DEFAULT_SETTINGS_SLIT, DEFAULT_SETTINGS_FIT,
@@ -82,15 +81,11 @@ def make_tab_fit(sample_length, noise_level, offset):
             id="start-fit-button", n_clicks=0,
             color="primary"
         ),
-        dbc.Button(
-            "Show fit", id="show-fit-button", n_clicks=0,
-            color="primary", disabled=True, className="float-right"
-        ),
         html.Div(
-            "Results will be shown here",
             id="report",
-            className="mt-2"
-        ),
+            className="mt-2 border-0",
+            style={"overflow": "auto", "height": "280px"}
+        )
     ]
     return tab_fit
 
@@ -131,14 +126,27 @@ def make_tab_origin():
 # fit signal tab
 def make_tab_fitting():
     tab_fitting = [
-        dbc.RadioItems(
-            options=[
-                {"label": "Markers", "value": "markers"},
-                {"label": "Line", "value": "lines"},
-            ],
-            value="markers",
-            inline=True,
-            id="change-line-style"
+        dbc.Row(
+            [
+                dbc.RadioItems(
+                    options=[
+                        {"label": "Markers", "value": "markers"},
+                        {"label": "Line", "value": "lines"},
+                    ],
+                    value="markers",
+                    inline=True,
+                    id="change-line-style"
+                ),
+                dbc.Checklist(
+                    options=[
+                        {"label": "Show fit", "value": "Show fit",
+                         "disabled": True},
+                    ],
+                    value=[],
+                    id="show-fit-button",
+                    switch=True,
+                ),
+            ]
         ),
         dbc.Spinner(
             dcc.Graph(id="fit-signal", figure=plot_placeholder(400),
@@ -321,15 +329,13 @@ def update_fit_signal(slit_parameters, spect_memo, fit_settings, data_1,
         Input("memory-fit-signal", "data"),
         Input("change-line-style", "value"),
     ],
-    Input("show-fit-button", "n_clicks"),
+    Input("show-fit-button", "value"),
     State("memory-fit-report", "data"),
 )
 def update_fit_graph(data, mode, show_click, fit_memo):
     fig = plot_fitting(*data, mode=mode)
-    ctx = dash.callback_context
-    if ctx.triggered[0]['prop_id'].split('.')[0] == "show-fit-button":
-        if show_click:
-            fig = add_fit_result(fig, fit_memo['nu'], fit_memo['best_fit'])
+    if show_click:
+        fig = add_fit_result(fig, fit_memo['nu'], fit_memo['best_fit'])
     return fig
 
 
@@ -351,10 +357,8 @@ def update_fit_spectrum(active_tab):
         Output("fitting-status", "children"),
         Output("memory-fit-report", "data"),
     ],
-    [
-        Input("start-fit-button", "n_clicks"),
-        Input("memory-fit-signal", "data"),
-    ],
+    Input("start-fit-button", "n_clicks"),
+    State("memory-fit-signal", "data"),
     State("memory-settings-slit", "data"),
     State("memory-settings-models", "data"),
     State("memory-settings-conditions", "data"),
@@ -376,14 +380,19 @@ def update_fit(n_clicks, data, slit_parameters, settings_models,
 # show report
 @app.callback(
     Output("report", "children"),
-    Output("show-fit-button", "disabled"),
+    Output("show-fit-button", "options"),
+    Output("show-fit-button", "value"),
+    Output("show-fit-button", "labelClassName"),
     Input("memory-fit-report", "data")
 )
 def show_report(data):
+    _switch = [{"label": "Show fit", "value": "Show fit", "disabled": False}]
     if data:
-        return data["report"], False
+        report = [html.P(_row, className="mb-0") for _row in data["report"].split("\n")]
+        return report, _switch, ["Show fit"], "text-primary"
     else:
-        return [], True
+        _switch[0]["disabled"] = True
+        return "Fitting results will be shown here", _switch, [], None
 
 
 # settings panels
