@@ -1,11 +1,13 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import dash
 import dash_bootstrap_components as dbc
-import time
 from app import app
-from utils import (DEFAULT_SETTINGS_SLIT, DEFAULT_SETTINGS_FIT, plot_fitting,
-                   plot_placeholder, plot_slit, least_sqrt_fit)
+from utils import (DEFAULT_SETTINGS_SLIT, DEFAULT_SETTINGS_FIT,
+                   downsample_synth, plot_fitting,
+                   plot_placeholder, plot_slit, least_sqrt_fit, unpack_lmfit,
+                   add_fit_result)
 from tab_synthesize import synth_mode_select, synth_inputs, input_slider
 
 
@@ -83,7 +85,12 @@ def make_tab_fit(sample_length, noise_level, offset):
         dbc.Button(
             "Show fit", id="show-fit-button", n_clicks=0,
             color="primary", disabled=True, className="float-right"
-        )
+        ),
+        html.Div(
+            "Results will be shown here",
+            id="report",
+            className="mt-2"
+        ),
     ]
     return tab_fit
 
@@ -288,23 +295,41 @@ def fit_settings_tab_content(active_tab, data_1, data_2):
         return make_tab_slit(**data_2)
 
 
-# plot fit signal
+# create fit signal
 @app.callback(
-    Output("fit-signal", "figure"),
+    Output("memory-fit-signal", "data"),
     [
         Input("memory-settings-slit", "data"),
         Input("memory-synth-spectrum", "data"),
         Input("memory-settings-fit", "data"),
         Input("memory-settings-models", "data"),
-        Input("change-line-style", "value"),
     ],
 )
-def update_fitting_graph(slit_parameters, spect_memo, fit_settings, data_1,
-                         mode):
+def update_fit_signal(slit_parameters, spect_memo, fit_settings, data_1,
+                      ):
     nu, spect = spect_memo
-    fig = plot_fitting(nu, spect, data_1['nu_start'], data_1['nu_end'],
-                       **fit_settings, slit_parameters=slit_parameters,
-                       mode=mode)
+    nu_expt, spect_expt, x_range = downsample_synth(
+        nu, spect, data_1['nu_start'], data_1['nu_end'], **fit_settings,
+        slit_parameters=slit_parameters)
+    return [nu_expt, spect_expt, x_range]
+
+
+# plot fit signal
+@app.callback(
+    Output("fit-signal", "figure"),
+    [
+        Input("memory-fit-signal", "data"),
+        Input("change-line-style", "value"),
+    ],
+    Input("show-fit-button", "n_clicks"),
+    State("memory-fit-report", "data"),
+)
+def update_fit_graph(data, mode, show_click, fit_memo):
+    fig = plot_fitting(*data, mode=mode)
+    ctx = dash.callback_context
+    if ctx.triggered[0]['prop_id'].split('.')[0] == "show-fit-button":
+        if show_click:
+            fig = add_fit_result(fig, fit_memo['nu'], fit_memo['best_fit'])
     return fig
 
 
@@ -324,27 +349,41 @@ def update_fit_spectrum(active_tab):
 @app.callback(
     [
         Output("fitting-status", "children"),
-        Output("memory-fit-signal", "data"),
+        Output("memory-fit-report", "data"),
     ],
     [
         Input("start-fit-button", "n_clicks"),
-        Input("fit-signal", "figure"),
+        Input("memory-fit-signal", "data"),
     ],
     State("memory-settings-slit", "data"),
     State("memory-settings-models", "data"),
     State("memory-settings-conditions", "data"),
 )
-def update_fit(n_clicks, figure, slit_parameters, settings_models,
+def update_fit(n_clicks, data, slit_parameters, settings_models,
                settings_conditions):
     fit_result = []
     if n_clicks:
         fit_result = least_sqrt_fit(
-                        figure['data'][0]['x'],
-                        figure['data'][0]['y'],
+                        data[0],
+                        data[1],
                         slit_parameters,
                         settings_models,
                         settings_conditions)
+        fit_result = unpack_lmfit(fit_result)
     return "Start fit", fit_result
+
+
+# show report
+@app.callback(
+    Output("report", "children"),
+    Output("show-fit-button", "disabled"),
+    Input("memory-fit-report", "data")
+)
+def show_report(data):
+    if data:
+        return data["report"], False
+    else:
+        return [], True
 
 
 # settings panels

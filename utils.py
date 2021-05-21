@@ -3,6 +3,7 @@ from carspy import CarsSpectrum, CarsFit
 from carspy.utils import pkl_load, downsample
 from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
+from lmfit.printfuncs import fit_report
 import plotly.graph_objects as go
 
 INIT_COMP = {'N2': 0.79,
@@ -48,7 +49,9 @@ DEFAULT_SETTINGS_FIT = {
 }
 
 SPECT_PATH = Path(__file__).parent / "_data/_DEFAULT_SPECTRUM"
+SIGNAL_PATH = Path(__file__).parent / "_data/_DEFAULT_FIT_SIGNAL"
 DEFAULT_SPECTRUM = pkl_load(SPECT_PATH)
+DEFAULT_FIT_SIGNAL = pkl_load(SIGNAL_PATH)
 
 
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
@@ -154,18 +157,15 @@ def downsample_synth(nu, spect, nu_start, nu_end, sample_length, noise_level,
     spect_conv = np.convolve(spect, slit_fcn, 'same')
     spect_expt = (downsample(nu_expt, nu, spect_conv) + noise*noise_level
                   - offset)
+    x_range = [nu_start, nu_end]
 
-    return nu_expt, spect_expt
+    return nu_expt, spect_expt, x_range
 
 
-def plot_fitting(nu, spect, nu_start, nu_end, sample_length, noise_level,
-                 offset, slit_parameters, mode='markers'):
-    nu_expt, spect_expt = downsample_synth(nu, spect, nu_start, nu_end,
-                                           sample_length, noise_level,
-                                           offset, slit_parameters)
+def plot_fitting(nu_expt, spect_expt, x_range, mode="markers"):
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=nu_expt, y=spect_expt/spect_expt.max(),
+        x=np.array(nu_expt), y=np.array(spect_expt)/np.array(spect_expt).max(),
         mode=mode,
         name="CARS Signal",
     ))
@@ -175,7 +175,15 @@ def plot_fitting(nu, spect, nu_start, nu_end, sample_length, noise_level,
                       margin={'l': 10, 'b': 10, 'r': 10, 't': 10},
                       xaxis_title="Wavenumber [1/cm]",
                       yaxis_title="Signal [-]",
-                      xaxis_range=[nu_start, nu_end])
+                      xaxis_range=x_range)
+    return fig
+
+
+def add_fit_result(fig, nu, spect):
+    fig.add_trace(go.Scatter(
+        x=np.array(nu), y=np.array(spect)/np.array(spect).max(),
+        mode="lines",
+    ))
     return fig
 
 
@@ -198,33 +206,37 @@ def least_sqrt_fit(nu_expt, spect_expt, slit_parameters, settings_models,
                        fit_mode=modes, ref_fac=80,
                        init_comp=init_comp)
     fit_expt.preprocess()
-    if slit_parameters['slit'] == "sGaussian":
-        params = (
-            ('temperature', 1500, True, 250, 3000),
-            ('del_Tv', 0, False),
-            ('x_mol', init_comp['N2'], False),
-            ('nu_shift', 0, True, -1, 1),
-            ('nu_stretch', 1, False),
-            ('pump_lw', 0.2, False),
-            ('param1', slit_parameters['sigma'], False),
-            ('param2', slit_parameters['k'], False),
-            ('param3', slit_parameters['a_sigma'], False),
-            ('param4', slit_parameters['a_k'], False)
-        )
-    else:
-        params = (
-            ('temperature', 1500, True, 250, 3000),
-            ('del_Tv', 0, False),
-            ('x_mol', init_comp['N2'], False),
-            ('nu_shift', 0, True, -1, 1),
-            ('nu_stretch', 1, False),
-            ('pump_lw', settings_models['pump_lw'], False),
-            ('param1', slit_parameters['sigma'], False),
-            ('param2', slit_parameters['k'], False),
-            ('param3', slit_parameters['a_sigma'], False),
-            ('param4', slit_parameters['a_k'], False),
-            ('param5', slit_parameters['sigma_L_l'], False),
-            ('param6', slit_parameters['sigma_L_h'], False)
-        )
+    params = (
+        ('temperature', 1500, True, 250, 3000),
+        ('del_Tv', 0, False),
+        ('x_mol', init_comp['N2'], False),
+        ('nu_shift', 0, True, -1, 1),
+        ('nu_stretch', 1, False),
+        ('pump_lw', 0.2, False),
+        ('param1', slit_parameters['sigma'], False),
+        ('param2', slit_parameters['k'], False),
+        ('param3', slit_parameters['a_sigma'], False),
+        ('param4', slit_parameters['a_k'], False),
+        ('param5', slit_parameters['sigma_L_l'], False),
+        ('param6', slit_parameters['sigma_L_h'], False)
+    )
+
     fit_expt.ls_fit(add_params=params, show_fit=False)
     return fit_expt.fit_result
+
+
+def unpack_lmfit(result):
+    nu = result.userkws['nu_expt']
+    signal_expt = result.data
+    best_fit = result.best_fit
+    T_fit = result.params['temperature'].value
+    dT = result.params['temperature'].stderr
+    report = fit_report(result)
+    return {
+        'nu': nu,
+        'signal_expt': signal_expt,
+        'best_fit': best_fit,
+        'T_fit': T_fit,
+        'dT': dT,
+        'report': report
+    }
