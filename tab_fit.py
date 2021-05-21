@@ -81,6 +81,14 @@ def make_tab_fit(sample_length, noise_level, offset):
             id="start-fit-button", n_clicks=0,
             color="primary"
         ),
+        dbc.Button(
+            [
+               html.Div("Show results"),
+            ],
+            id="print-report-button", n_clicks=0,
+            className="ml-2",
+            color="primary"
+        ),
         html.Div(
             id="report",
             className="mt-2 border-0",
@@ -377,22 +385,47 @@ def update_fit(n_clicks, data, slit_parameters, settings_models,
     return "Start fit", fit_result
 
 
-# show report
+# update show-fit-button
 @app.callback(
-    Output("report", "children"),
     Output("show-fit-button", "options"),
     Output("show-fit-button", "value"),
     Output("show-fit-button", "labelClassName"),
     Input("memory-fit-report", "data")
 )
-def show_report(data):
+def update_show_fit_button(data):
     _switch = [{"label": "Show fit", "value": "Show fit", "disabled": False}]
     if data:
-        report = [html.P(_row, className="mb-0") for _row in data["report"].split("\n")]
-        return report, _switch, ["Show fit"], "text-primary"
+        return _switch, ["Show fit"], "text-primary"
     else:
         _switch[0]["disabled"] = True
-        return "Fitting results will be shown here", _switch, [], None
+        return _switch, [], None
+
+
+# update show-report-button
+@app.callback(
+    Output("print-report-button", "disabled"),
+    Input("start-fit-button", "n_clicks"),
+    Input("fitting-status", "children")
+)
+def change_button_status(n_clicks, fitting_status):
+    if n_clicks and fitting_status == "Start fit":
+        return False
+    else:
+        return True
+
+
+# print report
+@app.callback(
+    Output("report", "children"),
+    Input("print-report-button", "n_clicks"),
+    State("memory-fit-report", "data")
+)
+def show_report(n_clicks, data):
+    report = ["Fitting results will be shown here"]
+    if n_clicks and report:
+        report = [html.P(_row, className="mb-0")
+                  for _row in data["report"].split("\n")]
+    return report
 
 
 # settings panels
