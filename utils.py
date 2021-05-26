@@ -3,7 +3,7 @@ from carspy import CarsSpectrum, CarsFit
 from carspy.utils import pkl_load, downsample
 from carspy.convol_fcn import asym_Gaussian, asym_Voigt
 import numpy as np
-from lmfit.printfuncs import fit_report, fitreport_html_table
+from lmfit.printfuncs import fit_report
 import plotly.graph_objects as go
 
 INIT_COMP = {'N2': 0.79,
