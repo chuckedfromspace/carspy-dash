@@ -9,7 +9,13 @@ The computation/loading speed is largely limited by the cloud server. To get the
 
 ## Screenshots
 
-![demo_gif_1](assets/demo1.gif)
+### Synthesize CARS signal
+
+![demo_gif_1](https://raw.githubusercontent.com/chuckedfromspace/carspy-dash/main/assets/demo1.gif)
+
+### Least-square fit of synthesized signal
+
+![demo_gif_2](https://raw.githubusercontent.com/chuckedfromspace/carspy-dash/main/assets/demo2.gif)
 
 ## How to run this app
 
