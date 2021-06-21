@@ -205,6 +205,7 @@ def least_sqrt_fit(nu_expt, spect_expt, slit_parameters, settings_models,
     init_comp = settings_conditions['comp']
     fit_expt = CarsFit(np.array(spect_expt), np.array(nu_expt),
                        fit_mode=modes, ref_fac=80,
+                       pressure=settings_conditions['pressure'],
                        init_comp=init_comp)
     fit_expt.preprocess()
     params = (
