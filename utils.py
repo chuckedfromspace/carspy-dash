@@ -25,7 +25,7 @@ DEFAULT_SETTINGS_MODELS = {
     "pump_lw": 1.0,
     "nu_start": 2262,
     "nu_end": 2345,
-    "num_sample": 10000,
+    "num_sample": 5000,
     "pump_ls": "Gaussian",
     "chi_rs": "isolated",
     "convol": "Yuratich",
@@ -55,7 +55,7 @@ DEFAULT_FIT_SIGNAL = pkl_load(SIGNAL_PATH)
 
 
 def synthesize_cars(pressure=1, temperature=1750, pump_lw=1.0,
-                    nu_start=2262, nu_end=2345, num_sample=10000,
+                    nu_start=2262, nu_end=2345, num_sample=5000,
                     pump_ls='Gaussian', chi_rs='isolated',
                     convol='Y', doppler_effect=False, comp=None):
     synth_mode = {'pump_ls': pump_ls,
