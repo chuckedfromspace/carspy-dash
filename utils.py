@@ -25,7 +25,7 @@ DEFAULT_SETTINGS_MODELS = {
     "pump_lw": 1.0,
     "nu_start": 2262,
     "nu_end": 2345,
-    "num_sample": 5000,
+    "num_sample": 2500,
     "pump_ls": "Gaussian",
     "chi_rs": "isolated",
     "convol": "Yuratich",
@@ -43,7 +43,7 @@ DEFAULT_SETTINGS_SLIT = {
 }
 
 DEFAULT_SETTINGS_FIT = {
-    "sample_length": 120,
+    "sample_length": 80,
     "noise_level": 1.5,
     "offset": 0.5
 }
