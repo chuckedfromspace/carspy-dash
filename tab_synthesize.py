@@ -141,7 +141,7 @@ def make_tab_models(nu_start, nu_end, pump_ls, chi_rs, convol, doppler_effect,
         input_slider("Pump laser linewdith [1/cm]",
                      "pump_lw-input", pump_lw, 0.02, 5, 0.02),
         input_slider("Number of sampling points",
-                     "num_sample-input", num_sample, 5000, 20000, 5000),
+                     "num_sample-input", num_sample, 2500, 15000, 2500),
         range_slider
     ]
 
